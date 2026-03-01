@@ -1,7 +1,4 @@
 {
-  "app": {
-    "title": "Boss Overlay - Clair Obscur E33"
-  },
   "settings": {
     "title": "Paramètres",
     "saveFilePath": "Chemin du fichier de sauvegarde :",
@@ -64,7 +61,8 @@
   "languages": {
     "fr": "Français",
     "en": "English",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "ru": "Русский"
   },
   "zones": {
     "Lumière - Prologue": "Lumière - Prologue",

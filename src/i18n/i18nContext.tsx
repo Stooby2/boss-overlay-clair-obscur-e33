@@ -9,15 +9,17 @@ import {
 import de from './locales/de.json'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
+import ru from './locales/ru.json'
 
-export type Language = 'fr' | 'en' | 'de'
+export type Language = 'fr' | 'en' | 'de' | 'ru'
 
-type TranslationObject = typeof fr
+type TranslationObject = typeof en
 
 const translations: Record<Language, TranslationObject> = {
   fr,
   en,
   de,
+  ru,
 }
 
 interface I18nContextType {
@@ -36,6 +38,7 @@ const detectSystemLanguage = (): Language => {
   const systemLang = navigator.language.toLowerCase()
   if (systemLang.startsWith('fr')) return 'fr'
   if (systemLang.startsWith('de')) return 'de'
+  if (systemLang.startsWith('ru')) return 'ru'
   return 'en' // Par défaut
 }
 
@@ -43,7 +46,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     // Charger la langue depuis la config
     if (window.electronAPI) {
-      return 'fr' // Temporaire, sera mis à jour par useEffect
+      return 'en' // Temporaire, sera mis à jour par useEffect
     }
     return detectSystemLanguage()
   })
