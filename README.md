@@ -11,4 +11,4 @@ Thanks to [CO E33 Save Editor](https://www.nexusmods.com/clairobscurexpedition33
 *Note: Since I saw that no one had made a "Boss Overlay" for COE33 yet, I wanted to try making one, but I wanted to have some quick software to see if it would work. So the project is (it pains me to say it) vibecoded. Of course, I plan to learn more so I don't have to do this again, even though there are both good and bad aspects to vibecoding.*
 
 # Contribution
-[6ykach](https://github.com/6ykach) : Russian Translation
+🇷🇺 [6ykach](https://github.com/6ykach) : Russian Translation
