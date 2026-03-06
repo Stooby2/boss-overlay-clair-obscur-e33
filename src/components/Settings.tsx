@@ -5,10 +5,7 @@ import { Language, useI18n } from '../i18n'
 interface Props {
   onSavePathChange: (path: string) => void
   currentPath: string
-  onConfigChange?: (config: {
-    allowManualEditAutoDetected?: boolean
-    allowBossEditing?: boolean
-  }) => void
+  onConfigChange?: (config: { allowManualEditAutoDetected?: boolean }) => void
 }
 
 function Settings({ onSavePathChange, currentPath, onConfigChange }: Props) {
@@ -16,14 +13,12 @@ function Settings({ onSavePathChange, currentPath, onConfigChange }: Props) {
   const [path, setPath] = useState(currentPath)
   const [isClearing, setIsClearing] = useState(false)
   const [allowManualEdit, setAllowManualEdit] = useState(false)
-  const [allowBossEditing, setAllowBossEditing] = useState(false)
 
   // Charger la config au montage
   useEffect(() => {
     if (window.electronAPI) {
       window.electronAPI.getConfig().then((config) => {
         setAllowManualEdit(config.allowManualEditAutoDetected ?? false)
-        setAllowBossEditing(config.allowBossEditing ?? false)
       })
     }
   }, [])
@@ -50,21 +45,6 @@ function Settings({ onSavePathChange, currentPath, onConfigChange }: Props) {
       const newConfig = {
         ...config,
         allowManualEditAutoDetected: checked,
-      }
-      await window.electronAPI.saveConfig(newConfig)
-
-      // Notifier App.tsx du changement immédiatement
-      onConfigChange?.(newConfig)
-    }
-  }
-
-  const handleToggleBossEditing = async (checked: boolean) => {
-    setAllowBossEditing(checked)
-    if (window.electronAPI) {
-      const config = await window.electronAPI.getConfig()
-      const newConfig = {
-        ...config,
-        allowBossEditing: checked,
       }
       await window.electronAPI.saveConfig(newConfig)
 
@@ -154,10 +134,9 @@ function Settings({ onSavePathChange, currentPath, onConfigChange }: Props) {
             cursor: 'pointer',
           }}
         >
-          <option value="fr">{t('languages.fr')}</option>
-          <option value="en">{t('languages.en')}</option>
-          <option value="de">{t('languages.de')}</option>
-          <option value="ru">{t('languages.ru')}</option>
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+          <option value="ru">Русский</option>
         </select>
       </div>
 
@@ -194,34 +173,6 @@ function Settings({ onSavePathChange, currentPath, onConfigChange }: Props) {
           }}
         >
           {t('settings.allowManualEditDesc')}
-        </p>
-
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            cursor: 'pointer',
-            marginTop: '16px',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={allowBossEditing}
-            onChange={(e) => handleToggleBossEditing(e.target.checked)}
-            style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-          />
-          <span>{t('settings.allowBossEditing')}</span>
-        </label>
-        <p
-          style={{
-            fontSize: '12px',
-            color: '#95a5a6',
-            marginTop: '8px',
-            marginLeft: '28px',
-          }}
-        >
-          {t('settings.allowBossEditingDesc')}
         </p>
       </div>
 

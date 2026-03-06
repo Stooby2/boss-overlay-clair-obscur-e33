@@ -24,7 +24,6 @@ function getManualStatesPath(savePath: string): string {
 interface AppConfig {
   lastSavePath?: string
   allowManualEditAutoDetected?: boolean
-  allowBossEditing?: boolean
   language?: string
 }
 
@@ -248,7 +247,7 @@ ipcMain.handle(
     event,
     bossInfo: {
       originalName: string
-      displayName: string
+      id: string
       category: string
       zone: string
     },
