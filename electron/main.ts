@@ -173,7 +173,7 @@ function createWindow(config: AppConfig = {}) {
   console.log('__dirname:', __dirname)
 
   mainWindow = new BrowserWindow({
-    width: 750,
+    width: 725,
     height: 1000,
     ...restoredPosition,
     transparent: true,
