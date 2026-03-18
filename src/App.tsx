@@ -11,7 +11,7 @@ import { SaveSnapshot } from './types/SaveSnapshot'
 function App() {
   const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
-  const [, setPictos] = useState<Picto[]>([])
+  const [pictos, setPictos] = useState<Picto[]>([])
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
   const [isAddingBoss, setIsAddingBoss] = useState(false)
@@ -172,6 +172,7 @@ function App() {
       ) : (
         <BossChecklist
           bosses={bosses}
+          pictos={pictos}
           onAddBoss={handleAddBoss}
           onToggleBoss={handleToggleBoss}
           allowManualEdit={allowManualEdit}

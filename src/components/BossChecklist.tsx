@@ -1,10 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '../i18n'
 import { Boss } from '../types/Boss'
+import { Picto } from '../types/Picto'
+import {
+  buildChecklistModel,
+  reportUnmatchedZoneNames,
+} from './checklistModel'
 
 interface Props {
   bosses: Boss[]
+  pictos: Picto[]
   onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
@@ -20,6 +26,7 @@ interface ZoneGroup {
 
 function BossChecklist({
   bosses,
+  pictos,
   onAddBoss,
   onToggleBoss,
   allowManualEdit = false,
@@ -31,40 +38,34 @@ function BossChecklist({
   >('all')
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
-  // Grouper les boss par zone
+  const checklistModel = useMemo(
+    () => buildChecklistModel(bosses, pictos),
+    [bosses, pictos],
+  )
+
+  useEffect(() => {
+    reportUnmatchedZoneNames(checklistModel.unmatchedZoneNames)
+  }, [checklistModel.unmatchedZoneNames])
+
   const zoneGroups = useMemo(() => {
-    const groups = new Map<string, Boss[]>()
+    return checklistModel.zoneGroups
+      .filter((zone) => zone.bosses.length > 0)
+      .map(
+        (zone): ZoneGroup => ({
+          zoneName: zone.zoneName,
+          bosses: zone.bosses,
+          killed: zone.killed,
+          encountered: zone.encountered,
+          total: zone.totalBosses,
+        }),
+      )
+  }, [checklistModel.zoneGroups])
 
-    bosses.forEach((boss) => {
-      const zoneName = boss.zone || 'Uncategorized'
-
-      if (!groups.has(zoneName)) {
-        groups.set(zoneName, [])
-      }
-      groups.get(zoneName)!.push(boss)
-    })
-
-    // Convertir en array (ordre d'insertion naturel)
-    const groupArray: ZoneGroup[] = Array.from(groups.entries()).map(
-      ([zoneName, zoneBosses]) => ({
-        zoneName,
-        bosses: zoneBosses,
-        killed: zoneBosses.filter((b) => b.killed).length,
-        encountered: zoneBosses.filter((b) => b.encountered).length,
-        total: zoneBosses.length,
-      }),
-    )
-
-    return groupArray
-  }, [bosses])
-
-  // Filtrer les boss selon le terme de recherche et le mode
   const filteredZoneGroups = useMemo(() => {
     return zoneGroups
       .map((zone) => {
         let filtered = zone.bosses
 
-        // Filtre par statut
         if (filterMode === 'alive') {
           filtered = filtered.filter((boss) => !boss.killed)
         } else if (filterMode === 'killed') {
@@ -73,7 +74,6 @@ function BossChecklist({
           filtered = filtered.filter((boss) => boss.encountered)
         }
 
-        // Filtre par recherche
         if (searchTerm.trim()) {
           const term = searchTerm.toLowerCase()
           filtered = filtered.filter(
@@ -89,11 +89,10 @@ function BossChecklist({
           visibleTotal: filtered.length,
         }
       })
-      .filter((zone) => zone.bosses.length > 0) // Retirer les zones vides après filtrage
-  }, [zoneGroups, searchTerm, filterMode])
+      .filter((zone) => zone.bosses.length > 0)
+  }, [zoneGroups, searchTerm, filterMode, translateBossName])
 
   const stats = useMemo(() => {
-    // Compter uniquement les boss rencontrés et vaincus pour le killed
     const killed = bosses.filter((b) => b.encountered && b.killed).length
     const total = bosses.length
     return { killed, total }
@@ -128,7 +127,6 @@ function BossChecklist({
         </div>
       ) : (
         <>
-          {/* Stats */}
           <div className="stats">
             <span className="stat-item killed">
               {t('bossList.bossesKilled', {
@@ -155,7 +153,6 @@ function BossChecklist({
             )}
           </div>
 
-          {/* Barre de recherche */}
           <input
             type="text"
             className="search-input"
@@ -164,7 +161,6 @@ function BossChecklist({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-          {/* Filtres */}
           <div className="filters">
             <button
               className={`filter-btn ${filterMode === 'all' ? 'active' : ''}`}
@@ -203,7 +199,6 @@ function BossChecklist({
             </button>
           </div>
 
-          {/* Liste des boss groupés par zone */}
           <div className="boss-items">
             {filteredZoneGroups.length === 0 ? (
               <div className="empty">
