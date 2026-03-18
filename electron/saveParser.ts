@@ -13,6 +13,14 @@ import {
   type LocationSaveData,
 } from './locations.js'
 import {
+  extractMonocoFeet,
+  type MonocoFeetCatalogFile,
+  type MonocoFeetMetadataEntry,
+  type MonocoFeetMetadataRow,
+  type MonocoFeetSaveData,
+  parseMonocoFeetMetadata,
+} from './monocoFeet.js'
+import {
   extractPictos,
   parsePictoAcquireTsv,
   type PictoAcquireInfo,
@@ -37,6 +45,9 @@ let bossMap: Map<string, { id: string; category: string; zone: string }> | null 
 let pictoCatalog: Record<string, string> | null = null
 let pictoAcquireInfo: Map<string, PictoAcquireInfo> | null = null
 let locationCatalog: LocationCatalogFile | null = null
+let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
+  null
+let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
 
 type BossDatabaseByZone = Record<
   string,
@@ -54,7 +65,7 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData extends LocationSaveData {
+interface SaveData extends LocationSaveData, MonocoFeetSaveData {
   root: {
     properties: PictoSaveProperties & {
       MapToLoad_0?: {
@@ -194,6 +205,38 @@ async function loadPictoData() {
   }
 }
 
+async function loadMonocoFeetData() {
+  if (monocoFeetCatalog && monocoFeetMetadata) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('monoco_feet.json')
+    const metadataPath = getDataPath('feet_collection_with_locations.json')
+    console.log('Loading Monoco feet catalog from:', catalogPath)
+    console.log('Loading Monoco feet metadata from:', metadataPath)
+
+    const [catalogContent, metadataContent] = await Promise.all([
+      readFile(catalogPath, 'utf-8'),
+      readFile(metadataPath, 'utf-8'),
+    ])
+
+    const parsedCatalog = JSON.parse(catalogContent) as MonocoFeetCatalogFile
+    const parsedMetadata = JSON.parse(metadataContent) as MonocoFeetMetadataRow[]
+
+    monocoFeetCatalog = parsedCatalog.MonocoFeet
+    monocoFeetMetadata = parseMonocoFeetMetadata(parsedMetadata)
+
+    console.log(
+      `Loaded ${Object.keys(monocoFeetCatalog).length} Monoco feet with ${monocoFeetMetadata.size} metadata rows`,
+    )
+  } catch (error) {
+    console.error('Failed to load Monoco feet data:', error)
+    monocoFeetCatalog = {}
+    monocoFeetMetadata = new Map()
+  }
+}
+
 export async function saveBossDatabase(newBoss: {
   originalName: string
   id: string
@@ -247,6 +290,10 @@ function createFallbackSnapshot(): SaveSnapshot {
       pictoCatalog && pictoAcquireInfo
         ? extractPictos({}, pictoCatalog, pictoAcquireInfo)
         : [],
+    monocoFeet:
+      monocoFeetCatalog && monocoFeetMetadata
+        ? extractMonocoFeet({}, monocoFeetCatalog, monocoFeetMetadata)
+        : [],
     location: null,
   }
 }
@@ -258,6 +305,10 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
       pictoCatalog && pictoAcquireInfo
         ? extractPictos(saveData, pictoCatalog, pictoAcquireInfo)
         : [],
+    monocoFeet:
+      monocoFeetCatalog && monocoFeetMetadata
+        ? extractMonocoFeet(saveData, monocoFeetCatalog, monocoFeetMetadata)
+        : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -266,6 +317,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadBossDatabase()
   await loadLocationData()
   await loadPictoData()
+  await loadMonocoFeetData()
 
   try {
     const stats = await stat(savePath)

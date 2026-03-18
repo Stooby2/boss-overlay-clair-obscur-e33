@@ -1,4 +1,4 @@
-﻿export interface MonocoFoot {
+export interface MonocoFoot {
   id: string
   skillId: string
   skillName: string
