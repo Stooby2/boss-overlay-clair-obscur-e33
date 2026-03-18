@@ -11,6 +11,12 @@ body {
 }
 
 .app {
+  --text-primary: rgba(255, 255, 255, 1);
+  --text-secondary: rgba(255, 255, 255, 0.78);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --killed-item-opacity: 0.78;
+  --not-encountered-opacity: 0.62;
+  --found-picto-opacity: 0.86;
   width: 100%;
   height: 100vh;
   background: rgba(0, 0, 0, 0.85);
@@ -33,7 +39,7 @@ body {
 }
 
 .title-bar span {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -47,7 +53,7 @@ body {
 .controls button {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-primary);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
@@ -85,7 +91,7 @@ body {
 }
 
 .stat-item {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -111,7 +117,7 @@ body {
   background: #2ecc71;
   border: none;
   border-radius: 4px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 12px;
   cursor: pointer;
   font-weight: 600;
@@ -124,14 +130,14 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   outline: none;
   transition: all 0.3s;
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .search-input:focus {
@@ -151,7 +157,7 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -164,7 +170,7 @@ body {
 .filter-btn.active {
   background: #3498db;
   border-color: #3498db;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -217,7 +223,7 @@ body {
 
 .zone-name {
   flex: 1;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -234,7 +240,7 @@ body {
 }
 
 .zone-stats {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
 }
@@ -256,7 +262,7 @@ body {
 }
 
 .zone-audit-label {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -282,34 +288,34 @@ body {
 }
 
 .boss-item.killed {
-  opacity: 0.5;
+  opacity: var(--killed-item-opacity);
   border-left-color: #2ecc71;
 }
 
 .boss-item.not-encountered {
-  opacity: 0.35;
+  opacity: var(--not-encountered-opacity);
   border-left-color: #95a5a6;
 }
 
 .boss-item.not-encountered .name {
   font-style: italic;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .boss-item .checkbox {
   font-size: 20px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .boss-item .name {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .empty {
   text-align: center;
   padding: 40px 20px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .empty p {
@@ -318,7 +324,7 @@ body {
 
 .settings {
   padding: 20px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .settings h3 {
@@ -342,7 +348,7 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   margin-bottom: 10px;
 }
@@ -353,7 +359,7 @@ body {
   background: #3498db;
   border: none;
   border-radius: 4px;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -374,7 +380,7 @@ body {
 .info p {
   font-size: 12px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -408,7 +414,7 @@ body {
 
 .picto-item.found {
   border-left-color: #2ecc71;
-  opacity: 0.8;
+  opacity: var(--found-picto-opacity);
 }
 
 .picto-header {
@@ -419,7 +425,7 @@ body {
 }
 
 .picto-name {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -449,7 +455,7 @@ body {
 }
 
 .picto-label {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -457,11 +463,11 @@ body {
 }
 
 .picto-value {
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text-primary);
   font-size: 13px;
   line-height: 1.5;
 }
 
 .picto-description .picto-value {
-  color: rgba(255, 255, 255, 0.74);
+  color: var(--text-secondary);
 }

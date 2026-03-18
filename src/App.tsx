@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useState } from 'react'
 
 import BossChecklist from './components/BossChecklist'
 import { BossInfoForm } from './components/BossInfoForm'
@@ -9,7 +9,7 @@ import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
 import {
   DEFAULT_BACKGROUND_OPACITY,
-  getBackgroundColor,
+  getOverlayTheme,
   normalizeBackgroundOpacity,
 } from './utils/backgroundOpacity'
 
@@ -154,8 +154,22 @@ function App() {
     )
   }
 
+  const overlayTheme = useMemo(
+    () => getOverlayTheme(backgroundOpacity),
+    [backgroundOpacity],
+  )
+
+  const appStyle = useMemo(
+    () =>
+      ({
+        background: overlayTheme.backgroundColor,
+        ...overlayTheme.cssVariables,
+      }) as CSSProperties,
+    [overlayTheme],
+  )
+
   return (
-    <div className="app" style={{ background: getBackgroundColor(backgroundOpacity) }}>
+    <div className="app" style={appStyle}>
       {isAddingBoss && (
         <BossInfoForm
           boss={{
