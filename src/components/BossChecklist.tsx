@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '../i18n'
-import { Boss } from '../types/Boss'
-import { Picto } from '../types/Picto'
+import type { Boss } from '../types/Boss'
+import type { CurrentLocation } from '../types/CurrentLocation'
+import type { Picto } from '../types/Picto'
 import {
   buildChecklistModel,
   type ChecklistFilterMode,
@@ -14,6 +15,7 @@ import {
 interface Props {
   bosses: Boss[]
   pictos: Picto[]
+  currentLocation?: CurrentLocation | null
   onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
@@ -108,6 +110,7 @@ function PictoRow({ picto, t }: PictoRowProps) {
 function BossChecklist({
   bosses,
   pictos,
+  currentLocation: _currentLocation,
   onAddBoss,
   onToggleBoss,
   allowManualEdit = false,

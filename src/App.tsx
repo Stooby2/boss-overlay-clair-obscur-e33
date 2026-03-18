@@ -5,6 +5,7 @@ import { BossInfoForm } from './components/BossInfoForm'
 import Settings from './components/Settings'
 import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
+import { CurrentLocation } from './types/CurrentLocation'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
 import {
@@ -17,6 +18,7 @@ function App() {
   const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
   const [pictos, setPictos] = useState<Picto[]>([])
+  const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
   const [isAddingBoss, setIsAddingBoss] = useState(false)
@@ -63,6 +65,7 @@ function App() {
 
         setBosses(mergedBosses)
         setPictos(snapshot.pictos)
+        setLocation(snapshot.location)
       })
 
       window.electronAPI.onRestoreSavePath((path: string) => {
@@ -202,6 +205,7 @@ function App() {
         <BossChecklist
           bosses={bosses}
           pictos={pictos}
+          currentLocation={location}
           onAddBoss={handleAddBoss}
           onToggleBoss={handleToggleBoss}
           allowManualEdit={allowManualEdit}
