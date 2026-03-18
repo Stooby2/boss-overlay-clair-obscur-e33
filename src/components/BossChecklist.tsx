@@ -5,6 +5,7 @@ import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
+import { formatZoneLevelLabel } from '../utils/zoneLevelLabel.ts'
 import {
   buildChecklistModel,
   type ChecklistFilterMode,
@@ -341,6 +342,10 @@ function BossChecklist(props: Props) {
                       </span>
                       <span className="zone-name">
                         {translateZone(zone.zoneName)}
+                        {formatZoneLevelLabel(
+                          zone.recommendedMinLevel,
+                          zone.recommendedMaxLevel,
+                        )}
                       </span>
                       {unmatchedNames.length > 0 && (
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
