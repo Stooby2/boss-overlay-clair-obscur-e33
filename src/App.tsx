@@ -5,10 +5,13 @@ import { BossInfoForm } from './components/BossInfoForm'
 import Settings from './components/Settings'
 import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
+import { Picto } from './types/Picto'
+import { SaveSnapshot } from './types/SaveSnapshot'
 
 function App() {
   const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
+  const [, setPictos] = useState<Picto[]>([])
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
   const [isAddingBoss, setIsAddingBoss] = useState(false)
@@ -17,7 +20,6 @@ function App() {
   >({})
   const [allowManualEdit, setAllowManualEdit] = useState(false)
 
-  // Charger la config au démarrage
   useEffect(() => {
     if (window.electronAPI) {
       window.electronAPI.getConfig().then((config) => {
@@ -26,7 +28,6 @@ function App() {
     }
   }, [])
 
-  // Charger les états manuels quand le savePath change
   useEffect(() => {
     if (window.electronAPI && savePath) {
       window.electronAPI.getManualStates(savePath).then((states) => {
@@ -37,10 +38,8 @@ function App() {
 
   useEffect(() => {
     if (window.electronAPI) {
-      // Écouter les mises à jour des boss
-      window.electronAPI.onBossUpdate((bossList: Boss[]) => {
-        // Fusionner avec les états manuels
-        const mergedBosses = bossList.map((boss) => {
+      window.electronAPI.onBossUpdate((snapshot: SaveSnapshot) => {
+        const mergedBosses = snapshot.bosses.map((boss) => {
           if (boss.originalName && manualStates[boss.originalName]) {
             return {
               ...boss,
@@ -50,10 +49,11 @@ function App() {
           }
           return boss
         })
+
         setBosses(mergedBosses)
+        setPictos(snapshot.pictos)
       })
 
-      // Écouter la restauration du dernier chemin de sauvegarde
       window.electronAPI.onRestoreSavePath((path: string) => {
         setSavePath(path)
         window.electronAPI.startWatch(path)
@@ -107,19 +107,16 @@ function App() {
   const handleToggleBoss = async (boss: Boss, killed: boolean) => {
     if (!boss.originalName || !savePath) return
 
-    // Vérifier si c'est un boss manuel ou si l'option est activée
     const isManualBoss = boss.originalName.startsWith('MANUAL_')
     if (!isManualBoss && !allowManualEdit) {
-      // Empêcher la modification des boss non-manuels si l'option est désactivée
       return
     }
 
     const newState = {
       killed,
-      encountered: true, // Si on clique, c'est qu'on l'a rencontré
+      encountered: true,
     }
 
-    // Sauvegarder l'état manuel
     if (window.electronAPI) {
       await window.electronAPI.saveManualState(
         savePath,
@@ -128,28 +125,27 @@ function App() {
       )
     }
 
-    // Mettre à jour le state local
     setManualStates((prev) => ({
       ...prev,
       [boss.originalName!]: newState,
     }))
 
-    // Mettre à jour la liste des boss immédiatement
     setBosses((prevBosses) =>
-      prevBosses.map((b) =>
-        b.originalName === boss.originalName ? { ...b, ...newState } : b,
+      prevBosses.map((candidate) =>
+        candidate.originalName === boss.originalName
+          ? { ...candidate, ...newState }
+          : candidate,
       ),
     )
   }
 
   return (
     <div className="app">
-      {/* Formulaire d'ajout manuel de boss */}
       {isAddingBoss && (
         <BossInfoForm
           boss={{
             name: '',
-            originalName: `MANUAL_${Date.now()}`, // ID unique pour les boss manuels
+            originalName: `MANUAL_${Date.now()}`,
             category: 'Boss',
             zone: '',
           }}

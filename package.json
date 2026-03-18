@@ -14,6 +14,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "generate:pictos": "node --experimental-strip-types tools/generatePictosCatalog.mjs",
+    "test:save-parser": "node --experimental-strip-types test/saveParserPictos.test.ts",
+    "fill:pictos-acquire": "python tools/fill_missing_pictos_acquire.py",
+    "validate:pictos-acquire": "node tools/validatePictosAcquire.mjs",
     "ts:check": "tsc --noEmit",
     "prepare": "husky"
   },

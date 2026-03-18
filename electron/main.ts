@@ -234,8 +234,8 @@ ipcMain.handle('start-watch', async (event, savePath: string) => {
   config.lastSavePath = savePath
   await saveConfig(config)
 
-  watchSaveFile(savePath, (bossList) => {
-    mainWindow?.webContents.send('boss-update', bossList)
+  watchSaveFile(savePath, (snapshot) => {
+    mainWindow?.webContents.send('boss-update', snapshot)
   })
   // Retourner une valeur simple au lieu d'une fonction
   return { success: true, message: 'Watching started' }
@@ -352,3 +352,4 @@ ipcMain.handle('clear-manual-states', async (event, savePath: string) => {
     return { success: false, error: String(error) }
   }
 })
+
