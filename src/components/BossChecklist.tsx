@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../i18n'
 import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
 import {
   buildChecklistModel,
@@ -15,6 +16,7 @@ import {
 interface Props {
   bosses: Boss[]
   pictos: Picto[]
+  monocoFeet: MonocoFoot[]
   currentLocation?: CurrentLocation | null
   onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
@@ -107,14 +109,8 @@ function PictoRow({ picto, t }: PictoRowProps) {
   )
 }
 
-function BossChecklist({
-  bosses,
-  pictos,
-  currentLocation,
-  onAddBoss,
-  onToggleBoss,
-  allowManualEdit = false,
-}: Props) {
+function BossChecklist(props: Props) {
+  const { bosses, pictos, currentLocation, onAddBoss, onToggleBoss, allowManualEdit = false } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMode, setFilterMode] = useState<ChecklistFilterMode>('all')

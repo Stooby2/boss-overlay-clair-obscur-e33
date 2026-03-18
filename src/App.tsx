@@ -6,6 +6,7 @@ import Settings from './components/Settings'
 import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
 import { CurrentLocation } from './types/CurrentLocation'
+import { MonocoFoot } from './types/MonocoFoot'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
 import {
@@ -18,6 +19,7 @@ function App() {
   const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
   const [pictos, setPictos] = useState<Picto[]>([])
+  const [monocoFeet, setMonocoFeet] = useState<MonocoFoot[]>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -65,6 +67,7 @@ function App() {
 
         setBosses(mergedBosses)
         setPictos(snapshot.pictos)
+        setMonocoFeet(snapshot.monocoFeet)
         setLocation(snapshot.location)
       })
 
@@ -205,6 +208,7 @@ function App() {
         <BossChecklist
           bosses={bosses}
           pictos={pictos}
+          monocoFeet={monocoFeet}
           currentLocation={location}
           onAddBoss={handleAddBoss}
           onToggleBoss={handleToggleBoss}
