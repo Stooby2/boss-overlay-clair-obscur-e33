@@ -43,7 +43,9 @@ assert.deepEqual(report.resolvedZones.spring_meadows, {
 })
 
 assert.equal(report.resolvedZones.the_continent, undefined)
+assert.deepEqual(report.missingCanonicalZones, ['camp', 'the_continent'])
 assert.equal(report.missingCanonicalZones.includes('the_continent'), true)
+assert.equal(report.missingCanonicalZones.includes('camp'), true)
 assert.equal(report.missingCanonicalZones.includes('flying_waters'), false)
 assert.equal(report.missingCanonicalZones.includes('ancient_sanctuary'), false)
 assert.equal(report.missingCanonicalZones.includes('the_monolith'), false)
