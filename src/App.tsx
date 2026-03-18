@@ -2,6 +2,7 @@ import { CSSProperties, useEffect, useMemo, useState } from 'react'
 
 import BossChecklist from './components/BossChecklist'
 import { BossInfoForm } from './components/BossInfoForm'
+import type { ChecklistFilterMode } from './components/checklistModel'
 import Settings from './components/Settings'
 import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
@@ -34,6 +35,8 @@ function App() {
   const [backgroundOpacity, setBackgroundOpacity] = useState(
     DEFAULT_BACKGROUND_OPACITY,
   )
+  const [checklistFilterMode, setChecklistFilterMode] =
+    useState<ChecklistFilterMode>('all')
 
   useEffect(() => {
     if (window.electronAPI) {
@@ -213,6 +216,8 @@ function App() {
           pictos={pictos}
           monocoFeet={monocoFeet}
           currentLocation={location}
+          filterMode={checklistFilterMode}
+          onFilterModeChange={setChecklistFilterMode}
           onAddBoss={handleAddBoss}
           onToggleBoss={handleToggleBoss}
           allowManualEdit={allowManualEdit}

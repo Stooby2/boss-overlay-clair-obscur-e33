@@ -18,6 +18,8 @@ interface Props {
   pictos: Picto[]
   monocoFeet: MonocoFoot[]
   currentLocation?: CurrentLocation | null
+  filterMode: ChecklistFilterMode
+  onFilterModeChange: (mode: ChecklistFilterMode) => void
   onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
@@ -158,13 +160,14 @@ function BossChecklist(props: Props) {
     pictos,
     monocoFeet,
     currentLocation,
+    filterMode,
+    onFilterModeChange,
     onAddBoss,
     onToggleBoss,
     allowManualEdit = false,
   } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterMode, setFilterMode] = useState<ChecklistFilterMode>('all')
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
@@ -269,13 +272,13 @@ function BossChecklist(props: Props) {
           <div className="filters">
             <button
               className={`filter-btn ${filterMode === 'all' ? 'active' : ''}`}
-              onClick={() => setFilterMode('all')}
+              onClick={() => onFilterModeChange('all')}
             >
               {t('bossList.filterAll')}
             </button>
             <button
               className={`filter-btn ${filterMode === 'found' ? 'active' : ''}`}
-              onClick={() => setFilterMode('found')}
+              onClick={() => onFilterModeChange('found')}
             >
               {t('bossList.filterFound', {
                 bosses: stats.killedBosses.toString(),
@@ -285,7 +288,7 @@ function BossChecklist(props: Props) {
             </button>
             <button
               className={`filter-btn ${filterMode === 'remaining' ? 'active' : ''}`}
-              onClick={() => setFilterMode('remaining')}
+              onClick={() => onFilterModeChange('remaining')}
             >
               {t('bossList.filterRemaining', {
                 bosses: stats.remainingBosses.toString(),
@@ -295,7 +298,7 @@ function BossChecklist(props: Props) {
             </button>
             <button
               className={`filter-btn ${filterMode === 'current_zone' ? 'active' : ''}`}
-              onClick={() => setFilterMode('current_zone')}
+              onClick={() => onFilterModeChange('current_zone')}
             >
               {t('bossList.filterCurrentZone', {
                 bosses: stats.currentZoneRemainingBosses.toString(),
