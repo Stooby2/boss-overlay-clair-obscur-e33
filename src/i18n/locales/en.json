@@ -47,7 +47,10 @@
     "pictoFound": "FOUND",
     "pictoMissing": "MISSING",
     "unmappedLocationBadge": "Unmapped",
-    "unmappedLocationLabel": "Needs zone mapping"
+    "unmappedLocationLabel": "Needs zone mapping",
+    "currentZoneLabel": "Current zone",
+    "currentZoneUnknown": "Unknown current zone",
+    "filterCurrentZone": "Current Zone {{bosses}} | {{pictos}}"
   },
   "bossForm": {
     "editTitle": "✏️ Edit boss",

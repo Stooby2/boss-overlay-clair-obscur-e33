@@ -110,7 +110,7 @@ function PictoRow({ picto, t }: PictoRowProps) {
 function BossChecklist({
   bosses,
   pictos,
-  currentLocation: _currentLocation,
+  currentLocation,
   onAddBoss,
   onToggleBoss,
   allowManualEdit = false,
@@ -121,8 +121,8 @@ function BossChecklist({
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
-    () => buildChecklistModel(bosses, pictos),
-    [bosses, pictos],
+    () => buildChecklistModel(bosses, pictos, currentLocation),
+    [bosses, pictos, currentLocation],
   )
 
   useEffect(() => {
@@ -140,6 +140,11 @@ function BossChecklist({
   )
 
   const stats = useMemo(() => summarizeChecklist(checklistModel), [checklistModel])
+
+  const currentLocationLabel =
+    currentLocation?.areaName ??
+    currentLocation?.displayName ??
+    t('bossList.currentZoneUnknown')
 
   const toggleZone = (zoneName: string) => {
     setCollapsedZones((prev) => {
@@ -193,6 +198,13 @@ function BossChecklist({
             )}
           </div>
 
+          <div className="current-location-banner">
+            <span className="current-location-label">
+              {t('bossList.currentZoneLabel')}
+            </span>
+            <span className="current-location-value">{currentLocationLabel}</span>
+          </div>
+
           <input
             type="text"
             className="search-input"
@@ -224,6 +236,15 @@ function BossChecklist({
               {t('bossList.filterRemaining', {
                 bosses: stats.remainingBosses.toString(),
                 pictos: stats.remainingPictos.toString(),
+              })}
+            </button>
+            <button
+              className={`filter-btn ${filterMode === 'current_zone' ? 'active' : ''}`}
+              onClick={() => setFilterMode('current_zone')}
+            >
+              {t('bossList.filterCurrentZone', {
+                bosses: stats.currentZoneRemainingBosses.toString(),
+                pictos: stats.currentZoneRemainingPictos.toString(),
               })}
             </button>
             <button

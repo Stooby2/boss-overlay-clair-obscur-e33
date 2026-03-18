@@ -145,13 +145,38 @@ body {
   border-color: #3498db;
 }
 
+.current-location-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(52, 152, 219, 0.08);
+  border: 1px solid rgba(52, 152, 219, 0.22);
+}
+
+.current-location-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.current-location-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .filters {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .filter-btn {
-  flex: 1;
+  flex: 1 1 140px;
   min-width: 0;
   padding: 8px 10px;
   background: rgba(255, 255, 255, 0.05);
