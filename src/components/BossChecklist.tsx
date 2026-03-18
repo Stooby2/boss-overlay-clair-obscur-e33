@@ -46,6 +46,11 @@ interface MonocoFootRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface JournalRowProps {
+  journal: JournalEntry
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 const CHECKBOX_KILLED = '\u2611'
 const CHECKBOX_ENCOUNTERED = '\u2610'
 const CHECKBOX_UNKNOWN = '\u2B1C'
@@ -157,6 +162,26 @@ function MonocoFootRow({ foot, t }: MonocoFootRowProps) {
   )
 }
 
+
+function JournalRow({ journal, t }: JournalRowProps) {
+  const summary = journal.summary || t('bossList.noJournalSummary')
+
+  return (
+    <div className={`journal-item ${journal.found ? 'found' : 'missing'}`}>
+      <div className="journal-header">
+        <span className="journal-name">{journal.name}</span>
+        <span className={`journal-status ${journal.found ? 'found' : 'missing'}`}>
+          {journal.found ? t('bossList.journalFound') : t('bossList.journalMissing')}
+        </span>
+      </div>
+      <div className="journal-meta journal-description">
+        <span className="journal-label">{t('bossList.journalSummaryLabel')}</span>
+        <span className="journal-value">{summary}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist(props: Props) {
   const {
     bosses,
@@ -201,7 +226,8 @@ function BossChecklist(props: Props) {
         (zone) =>
           zone.visibleBosses.length > 0 ||
           zone.visiblePictos.length > 0 ||
-          zone.visibleMonocoFeet.length > 0,
+          zone.visibleMonocoFeet.length > 0 ||
+          zone.visibleJournals.length > 0,
       ),
     [filteredZoneGroups],
   )
@@ -234,7 +260,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -259,6 +285,12 @@ function BossChecklist(props: Props) {
                 {t('bossList.feetCollected', {
                   found: stats.foundFeet.toString(),
                   total: stats.totalFeet.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.journalsCollected', {
+                  found: stats.foundJournals.toString(),
+                  total: stats.totalJournals.toString(),
                 })}
               </span>
             </div>
@@ -365,7 +397,7 @@ function BossChecklist(props: Props) {
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
                       )}
                       <span className="zone-stats">
-                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet}
+                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet} | J {zone.foundJournals}/{zone.totalJournals}
                       </span>
                     </div>
                     {!isCollapsed && (
@@ -395,6 +427,9 @@ function BossChecklist(props: Props) {
                         ))}
                         {zone.visibleMonocoFeet.map((foot) => (
                           <MonocoFootRow key={`${zone.zoneName}-${foot.id}`} foot={foot} t={t} />
+                        ))}
+                        {zone.visibleJournals.map((journal) => (
+                          <JournalRow key={`${zone.zoneName}-${journal.id}`} journal={journal} t={t} />
                         ))}
                       </div>
                     )}
