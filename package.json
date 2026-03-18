@@ -22,7 +22,9 @@
     "prepare": "husky",
     "test:checklist-model": "node --experimental-strip-types test/checklistModel.test.ts",
     "test:background-opacity": "node --experimental-strip-types test/backgroundOpacity.test.ts",
-    "test:current-location": "node --experimental-strip-types test/currentLocation.test.ts"
+    "test:current-location": "node --experimental-strip-types test/currentLocation.test.ts",
+    "generate:monoco-feet": "node --experimental-strip-types tools/generateMonocoFeetCatalog.ts",
+    "test:monoco-feet-catalog": "node --experimental-strip-types test/monocoFeetCatalog.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
