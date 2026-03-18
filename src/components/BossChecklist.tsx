@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '../i18n'
 import type { Boss } from '../types/Boss'
@@ -36,6 +36,11 @@ interface PictoRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface MonocoFootRowProps {
+  foot: MonocoFoot
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 function BossRow({
   boss,
   allowManualEdit,
@@ -64,7 +69,7 @@ function BossRow({
         }}
         title={tooltipText}
       >
-        {boss.killed ? '☑' : boss.encountered ? '☐' : '⬜'}
+        {boss.killed ? 'â˜‘' : boss.encountered ? 'â˜' : 'â¬œ'}
       </span>
       <span className="name">
         {translateBossName(boss.name)}
@@ -77,7 +82,7 @@ function BossRow({
             }}
             title={t('bossList.manuallyAdded')}
           >
-            🔧
+            ðŸ”§
           </span>
         )}
       </span>
@@ -109,8 +114,45 @@ function PictoRow({ picto, t }: PictoRowProps) {
   )
 }
 
+function MonocoFootRow({ foot, t }: MonocoFootRowProps) {
+  const locations = foot.locations.length > 0
+    ? foot.locations.join(', ')
+    : t('bossList.noFootLocations')
+  const droppedBy = foot.monsterName || t('bossList.noFootMonster')
+
+  return (
+    <div className={`monoco-foot-item ${foot.found ? 'found' : 'missing'}`}>
+      <div className="monoco-foot-header">
+        <div className="monoco-foot-title-block">
+          <span className="monoco-foot-name">{foot.skillName}</span>
+          <span className="monoco-foot-subtitle">{foot.footName}</span>
+        </div>
+        <span className={`monoco-foot-status ${foot.found ? 'found' : 'missing'}`}>
+          {foot.found ? t('bossList.footFound') : t('bossList.footMissing')}
+        </span>
+      </div>
+      <div className="monoco-foot-meta">
+        <span className="monoco-foot-label">{t('bossList.footDroppedByLabel')}</span>
+        <span className="monoco-foot-value">{droppedBy}</span>
+      </div>
+      <div className="monoco-foot-meta monoco-foot-description">
+        <span className="monoco-foot-label">{t('bossList.footLocationsLabel')}</span>
+        <span className="monoco-foot-value">{locations}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist(props: Props) {
-  const { bosses, pictos, monocoFeet, currentLocation, onAddBoss, onToggleBoss, allowManualEdit = false } = props
+  const {
+    bosses,
+    pictos,
+    monocoFeet,
+    currentLocation,
+    onAddBoss,
+    onToggleBoss,
+    allowManualEdit = false,
+  } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMode, setFilterMode] = useState<ChecklistFilterMode>('all')
@@ -165,7 +207,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -184,6 +226,12 @@ function BossChecklist(props: Props) {
                 {t('bossList.pictosCollected', {
                   found: stats.foundPictos.toString(),
                   total: stats.totalPictos.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.feetCollected', {
+                  found: stats.foundFeet.toString(),
+                  total: stats.totalFeet.toString(),
                 })}
               </span>
             </div>
@@ -223,6 +271,7 @@ function BossChecklist(props: Props) {
               {t('bossList.filterFound', {
                 bosses: stats.killedBosses.toString(),
                 pictos: stats.foundPictos.toString(),
+                feet: stats.foundFeet.toString(),
               })}
             </button>
             <button
@@ -232,6 +281,7 @@ function BossChecklist(props: Props) {
               {t('bossList.filterRemaining', {
                 bosses: stats.remainingBosses.toString(),
                 pictos: stats.remainingPictos.toString(),
+                feet: stats.remainingFeet.toString(),
               })}
             </button>
             <button
@@ -241,6 +291,7 @@ function BossChecklist(props: Props) {
               {t('bossList.filterCurrentZone', {
                 bosses: stats.currentZoneRemainingBosses.toString(),
                 pictos: stats.currentZoneRemainingPictos.toString(),
+                feet: stats.currentZoneRemainingFeet.toString(),
               })}
             </button>
             <button
@@ -252,7 +303,7 @@ function BossChecklist(props: Props) {
                   : t('bossList.collapseAll')
               }
             >
-              {collapsedZones.size === filteredZoneGroups.length ? '📂' : '📁'}
+              {collapsedZones.size === filteredZoneGroups.length ? 'ðŸ“‚' : 'ðŸ“'}
             </button>
           </div>
 
@@ -274,7 +325,7 @@ function BossChecklist(props: Props) {
                       onClick={() => toggleZone(zone.zoneName)}
                     >
                       <span className="zone-toggle">
-                        {isCollapsed ? '▶' : '▼'}
+                        {isCollapsed ? 'â–¶' : 'â–¼'}
                       </span>
                       <span className="zone-name">
                         {translateZone(zone.zoneName)}
@@ -283,7 +334,7 @@ function BossChecklist(props: Props) {
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
                       )}
                       <span className="zone-stats">
-                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos}
+                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet}
                       </span>
                     </div>
                     {!isCollapsed && (
@@ -310,6 +361,9 @@ function BossChecklist(props: Props) {
                         ))}
                         {zone.visiblePictos.map((picto) => (
                           <PictoRow key={`${zone.zoneName}-${picto.id}`} picto={picto} t={t} />
+                        ))}
+                        {zone.visibleMonocoFeet.map((foot) => (
+                          <MonocoFootRow key={`${zone.zoneName}-${foot.id}`} foot={foot} t={t} />
                         ))}
                       </div>
                     )}

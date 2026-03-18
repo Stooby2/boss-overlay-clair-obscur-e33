@@ -176,7 +176,7 @@ body {
 }
 
 .filter-btn {
-  flex: 1 1 140px;
+  flex: 1 1 120px;
   min-width: 0;
   padding: 8px 10px;
   background: rgba(255, 255, 255, 0.05);
@@ -494,5 +494,88 @@ body {
 }
 
 .picto-description .picto-value {
+  color: var(--text-secondary);
+}
+
+
+.monoco-foot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid #9b59b6;
+}
+
+.monoco-foot-item.found {
+  border-left-color: #2ecc71;
+  opacity: var(--found-picto-opacity);
+}
+
+.monoco-foot-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.monoco-foot-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.monoco-foot-name {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.monoco-foot-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.monoco-foot-status {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.monoco-foot-status.found {
+  background: rgba(46, 204, 113, 0.2);
+  color: #7dffb0;
+}
+
+.monoco-foot-status.missing {
+  background: rgba(155, 89, 182, 0.18);
+  color: #e0b8ff;
+}
+
+.monoco-foot-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.monoco-foot-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.monoco-foot-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.monoco-foot-description .monoco-foot-value {
   color: var(--text-secondary);
 }
