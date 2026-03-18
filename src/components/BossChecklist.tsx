@@ -69,7 +69,7 @@ function BossRow({
         }}
         title={tooltipText}
       >
-        {boss.killed ? 'â˜‘' : boss.encountered ? 'â˜' : 'â¬œ'}
+        {boss.killed ? '[x]' : boss.encountered ? '[ ]' : '[-]'}
       </span>
       <span className="name">
         {translateBossName(boss.name)}
@@ -82,7 +82,7 @@ function BossRow({
             }}
             title={t('bossList.manuallyAdded')}
           >
-            ðŸ”§
+            [M]
           </span>
         )}
       </span>
@@ -303,7 +303,7 @@ function BossChecklist(props: Props) {
                   : t('bossList.collapseAll')
               }
             >
-              {collapsedZones.size === filteredZoneGroups.length ? 'ðŸ“‚' : 'ðŸ“'}
+              {collapsedZones.size === filteredZoneGroups.length ? '+' : '-'}
             </button>
           </div>
 
@@ -325,7 +325,7 @@ function BossChecklist(props: Props) {
                       onClick={() => toggleZone(zone.zoneName)}
                     >
                       <span className="zone-toggle">
-                        {isCollapsed ? 'â–¶' : 'â–¼'}
+                        {isCollapsed ? '>' : 'v'}
                       </span>
                       <span className="zone-name">
                         {translateZone(zone.zoneName)}
