@@ -66,9 +66,9 @@ export interface ChecklistFilterOptions {
   translateBossName?: (bossName: string) => string
 }
 
-const DEFAULT_ZONE_NAME = 'uncategorized'
+export const DEFAULT_ZONE_NAME = 'uncategorized'
 
-const ZONE_ALIASES: Record<string, string[]> = {
+export const ZONE_ALIASES: Record<string, string[]> = {
   abbest_cave: ['abbest_cave', 'Abbest Cave'],
   crimson_forest: ['crimson_forest', 'Crimson Forest'],
   crushing_cavern: ['crushing_cavern', 'Crushing Cavern'],
@@ -168,7 +168,7 @@ for (const [zoneName, aliases] of Object.entries(ZONE_ALIASES)) {
   }
 }
 
-function toZoneLookupKey(value: string): string {
+export function toZoneLookupKey(value: string): string {
   return value
     .trim()
     .normalize('NFKD')

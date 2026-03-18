@@ -26,7 +26,8 @@
     "generate:monoco-feet": "node --experimental-strip-types tools/generateMonocoFeetCatalog.ts",
     "test:monoco-feet-catalog": "node --experimental-strip-types test/monocoFeetCatalog.test.ts",
     "test:monoco-feet-parser": "node --experimental-strip-types test/monocoFeetParser.test.ts",
-    "test:window-state": "node --experimental-strip-types test/windowState.test.ts"
+    "test:window-state": "node --experimental-strip-types test/windowState.test.ts",
+    "test:zone-levels": "node --experimental-strip-types test/zoneLevels.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
@@ -58,3 +59,4 @@
     "vite-plugin-electron-renderer": "0.14.6"
   }
 }
+
