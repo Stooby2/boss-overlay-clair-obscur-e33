@@ -21,7 +21,8 @@
     "ts:check": "tsc --noEmit",
     "prepare": "husky",
     "test:checklist-model": "node --experimental-strip-types test/checklistModel.test.ts",
-    "test:background-opacity": "node --experimental-strip-types test/backgroundOpacity.test.ts"
+    "test:background-opacity": "node --experimental-strip-types test/backgroundOpacity.test.ts",
+    "test:current-location": "node --experimental-strip-types test/currentLocation.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {

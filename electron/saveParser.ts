@@ -8,6 +8,11 @@ import { promisify } from 'util'
 import type { Boss } from '../src/types/Boss.js'
 import type { SaveSnapshot } from '../src/types/SaveSnapshot.js'
 import {
+  extractCurrentLocation,
+  type LocationCatalogFile,
+  type LocationSaveData,
+} from './locations.js'
+import {
   extractPictos,
   parsePictoAcquireTsv,
   type PictoAcquireInfo,
@@ -31,6 +36,7 @@ let bossMap: Map<string, { id: string; category: string; zone: string }> | null 
   null
 let pictoCatalog: Record<string, string> | null = null
 let pictoAcquireInfo: Map<string, PictoAcquireInfo> | null = null
+let locationCatalog: LocationCatalogFile | null = null
 
 type BossDatabaseByZone = Record<
   string,
@@ -48,9 +54,30 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData {
+interface SaveData extends LocationSaveData {
   root: {
     properties: PictoSaveProperties & {
+      MapToLoad_0?: {
+        Name: string
+      }
+      SpawnPointTagToLoadAt_0?: {
+        Struct: {
+          Struct: {
+            TagName_0: {
+              Name: string
+            }
+          }
+        }
+      }
+      ReturnSpawnPointTag_0?: {
+        Struct: {
+          Struct: {
+            TagName_0: {
+              Name: string
+            }
+          }
+        }
+      }
       BattledEnemies_0?: {
         Map: Array<{
           key: { Name: string }
@@ -114,6 +141,25 @@ async function loadBossDatabase() {
     console.log(`Loaded ${bossDatabase.length} boss entries`)
   } catch (error) {
     console.error('Failed to load boss database:', error)
+  }
+}
+
+async function loadLocationData() {
+  if (locationCatalog) {
+    return
+  }
+
+  try {
+    const locationPath = getDataPath('locations.json')
+    console.log('Loading location catalog from:', locationPath)
+
+    const locationContent = await readFile(locationPath, 'utf-8')
+    locationCatalog = JSON.parse(locationContent) as LocationCatalogFile
+
+    console.log(`Loaded ${Object.keys(locationCatalog.levels).length} locations`)
+  } catch (error) {
+    console.error('Failed to load location catalog:', error)
+    locationCatalog = { levels: {} }
   }
 }
 
@@ -201,6 +247,7 @@ function createFallbackSnapshot(): SaveSnapshot {
       pictoCatalog && pictoAcquireInfo
         ? extractPictos({}, pictoCatalog, pictoAcquireInfo)
         : [],
+    location: null,
   }
 }
 
@@ -211,11 +258,13 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
       pictoCatalog && pictoAcquireInfo
         ? extractPictos(saveData, pictoCatalog, pictoAcquireInfo)
         : [],
+    location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
 
 export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadBossDatabase()
+  await loadLocationData()
   await loadPictoData()
 
   try {
