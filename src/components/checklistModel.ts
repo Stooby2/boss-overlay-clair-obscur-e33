@@ -1,8 +1,9 @@
-import type { Boss } from '../types/Boss'
+ï»¿import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
 
-export type ZoneSource = 'boss' | 'picto' | 'location'
+export type ZoneSource = 'boss' | 'picto' | 'foot' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
@@ -20,23 +21,28 @@ export interface ChecklistZoneGroup {
   zoneName: string
   bosses: Boss[]
   pictos: Picto[]
+  monocoFeet: MonocoFoot[]
   killed: number
   encountered: number
   totalBosses: number
   foundPictos: number
   totalPictos: number
+  foundFeet: number
+  totalFeet: number
   unmatchedEntries: UnmatchedZoneName[]
 }
 
 export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
   visibleBosses: Boss[]
   visiblePictos: Picto[]
+  visibleMonocoFeet: MonocoFoot[]
 }
 
 export interface ChecklistModel {
   zoneGroups: ChecklistZoneGroup[]
   unmatchedZoneNames: UnmatchedZoneName[]
   currentZoneName: string | null
+  monocoFeet: MonocoFoot[]
 }
 
 export interface ChecklistSummary {
@@ -46,8 +52,12 @@ export interface ChecklistSummary {
   foundPictos: number
   totalPictos: number
   remainingPictos: number
+  foundFeet: number
+  totalFeet: number
+  remainingFeet: number
   currentZoneRemainingBosses: number
   currentZoneRemainingPictos: number
+  currentZoneRemainingFeet: number
 }
 
 export interface ChecklistFilterOptions {
@@ -103,10 +113,10 @@ const ZONE_ALIASES: Record<string, string[]> = {
   gestral_village: ['gestral_village', 'Gestral Village'],
   hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
   isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
-  lumiere: ['lumiere', 'Lumiere', 'Lumière'],
+  lumiere: ['lumiere', 'Lumiere', 'LumiÃ¨re'],
   lumiere_prologue: ['lumiere_prologue', 'Lumiere - Prologue'],
   monoco_station: ['monoco_station', "Monoco's Station"],
-  old_lumiere: ['old_lumiere', 'Old Lumiere', 'Old Lumière'],
+  old_lumiere: ['old_lumiere', 'Old Lumiere', 'Old LumiÃ¨re'],
   painting_workshop: ['painting_workshop', 'Painting Workshop'],
   red_woods: ['red_woods', 'Red Woods'],
   renoir_drafts: [
@@ -116,8 +126,8 @@ const ZONE_ALIASES: Record<string, string[]> = {
   ],
   sacred_river: ['sacred_river', 'Sacred River'],
   sinister_cave: ['sinister_cave', 'Sinister Cave'],
-  sirene: ['sirene', 'Sirene', 'Sirène'],
-  sirene_dress: ['sirene_dress', "Sirene's Dress", "Sirène's Dress"],
+  sirene: ['sirene', 'Sirene', 'SirÃ¨ne'],
+  sirene_dress: ['sirene_dress', "Sirene's Dress", "SirÃ¨ne's Dress"],
   sky_island: ['sky_island', 'Sky Island', 'Sky Island - Entrance'],
   spring_meadows: ['spring_meadows', 'Spring Meadows'],
   stone_wave_cliffs: [
@@ -190,6 +200,12 @@ function pictoMatchesSearch(picto: Picto, term: string): boolean {
   ].some((value) => value.toLowerCase().includes(term))
 }
 
+function monocoFootMatchesSearch(foot: MonocoFoot, term: string): boolean {
+  return [foot.skillName, foot.footName, foot.monsterName, ...foot.locations].some(
+    (value) => value.toLowerCase().includes(term),
+  )
+}
+
 function bossMatchesFilter(boss: Boss, filterMode: ChecklistFilterMode): boolean {
   if (filterMode === 'found') {
     return boss.encountered && boss.killed
@@ -212,6 +228,21 @@ function pictoMatchesFilter(
 
   if (filterMode === 'remaining' || filterMode === 'current_zone') {
     return !picto.found
+  }
+
+  return true
+}
+
+function monocoFootMatchesFilter(
+  foot: MonocoFoot,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return foot.found
+  }
+
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
+    return !foot.found
   }
 
   return true
@@ -272,6 +303,7 @@ function normalizeCurrentLocation(
 export function buildChecklistModel(
   bosses: Boss[],
   pictos: Picto[],
+  monocoFeet: MonocoFoot[],
   currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
@@ -287,11 +319,14 @@ export function buildChecklistModel(
       zoneName,
       bosses: [],
       pictos: [],
+      monocoFeet: [],
       killed: 0,
       encountered: 0,
       totalBosses: 0,
       foundPictos: 0,
       totalPictos: 0,
+      foundFeet: 0,
+      totalFeet: 0,
       unmatchedEntries: [],
     }
     groups.set(zoneName, created)
@@ -341,6 +376,36 @@ export function buildChecklistModel(
     }
   }
 
+  for (const foot of monocoFeet) {
+    const rawLocations = foot.locations.length > 0 ? foot.locations : ['']
+    const processedZones = new Set<string>()
+
+    for (const rawLocation of rawLocations) {
+      const normalized = normalizeZoneName(rawLocation, 'foot')
+      if (processedZones.has(normalized.zoneName)) {
+        continue
+      }
+      processedZones.add(normalized.zoneName)
+
+      const group = getOrCreateGroup(normalized.zoneName)
+      group.monocoFeet.push(foot)
+      group.totalFeet += 1
+      if (foot.found) {
+        group.foundFeet += 1
+      }
+
+      if (!normalized.matched && rawLocation.trim().length > 0) {
+        const unmatched = {
+          source: 'foot' as const,
+          rawName: rawLocation.trim(),
+          fallbackZoneName: normalized.zoneName,
+        }
+        unmatchedZoneNames.push(unmatched)
+        group.unmatchedEntries.push(unmatched)
+      }
+    }
+  }
+
   const normalizedLocation = normalizeCurrentLocation(currentLocation)
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
@@ -348,6 +413,7 @@ export function buildChecklistModel(
     zoneGroups: Array.from(groups.values()),
     unmatchedZoneNames,
     currentZoneName: normalizedLocation.currentZoneName,
+    monocoFeet,
   }
 }
 
@@ -365,6 +431,8 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     (sum, zone) => sum + zone.foundPictos,
     0,
   )
+  const totalFeet = model.monocoFeet.length
+  const foundFeet = model.monocoFeet.filter((foot) => foot.found).length
   const currentZone = model.currentZoneName
     ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
     : null
@@ -376,11 +444,17 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundPictos,
     totalPictos,
     remainingPictos: totalPictos - foundPictos,
+    foundFeet,
+    totalFeet,
+    remainingFeet: totalFeet - foundFeet,
     currentZoneRemainingBosses: currentZone
       ? currentZone.totalBosses - currentZone.killed
       : 0,
     currentZoneRemainingPictos: currentZone
       ? currentZone.totalPictos - currentZone.foundPictos
+      : 0,
+    currentZoneRemainingFeet: currentZone
+      ? currentZone.totalFeet - currentZone.foundFeet
       : 0,
   }
 }
@@ -416,14 +490,24 @@ export function filterChecklistGroups(
           (searchTerm.length === 0 || pictoMatchesSearch(picto, searchTerm)),
       )
 
+      const visibleMonocoFeet = zone.monocoFeet.filter(
+        (foot) =>
+          monocoFootMatchesFilter(foot, options.filterMode) &&
+          (searchTerm.length === 0 || monocoFootMatchesSearch(foot, searchTerm)),
+      )
+
       return {
         ...zone,
         visibleBosses,
         visiblePictos,
+        visibleMonocoFeet,
       }
     })
     .filter(
-      (zone) => zone.visibleBosses.length > 0 || zone.visiblePictos.length > 0,
+      (zone) =>
+        zone.visibleBosses.length > 0 ||
+        zone.visiblePictos.length > 0 ||
+        zone.visibleMonocoFeet.length > 0,
     )
 }
 

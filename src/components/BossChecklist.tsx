@@ -110,15 +110,15 @@ function PictoRow({ picto, t }: PictoRowProps) {
 }
 
 function BossChecklist(props: Props) {
-  const { bosses, pictos, currentLocation, onAddBoss, onToggleBoss, allowManualEdit = false } = props
+  const { bosses, pictos, monocoFeet, currentLocation, onAddBoss, onToggleBoss, allowManualEdit = false } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMode, setFilterMode] = useState<ChecklistFilterMode>('all')
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
-    () => buildChecklistModel(bosses, pictos, currentLocation),
-    [bosses, pictos, currentLocation],
+    () => buildChecklistModel(bosses, pictos, monocoFeet, currentLocation),
+    [bosses, pictos, monocoFeet, currentLocation],
   )
 
   useEffect(() => {
