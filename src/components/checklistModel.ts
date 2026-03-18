@@ -56,6 +56,12 @@ const DEFAULT_ZONE_NAME = 'uncategorized'
 
 const ZONE_ALIASES: Record<string, string[]> = {
   abbest_cave: ['abbest_cave', 'Abbest Cave'],
+  crimson_forest: ['crimson_forest', 'Crimson Forest'],
+  crushing_cavern: ['crushing_cavern', 'Crushing Cavern'],
+  dark_shores_bloodied_beach: [
+    'dark_shores_bloodied_beach',
+    'Dark Shores - Bloodied Beach',
+  ],
   ancient_sanctuary: ['ancient_sanctuary', 'Ancient Sanctuary'],
   camp: ['camp', 'Camp'],
   dark_gestral_arena: ['dark_gestral_arena', 'Dark Gestral Arena'],
@@ -64,12 +70,17 @@ const ZONE_ALIASES: Record<string, string[]> = {
     'Endless Night Sanctuary',
   ],
   endless_tower: ['endless_tower', 'Endless Tower'],
+  esoteric_ruins_continent: [
+    'esoteric_ruins_continent',
+    'Esoteric Ruins/Continent',
+  ],
   esquie_nest: ['esquie_nest', "Esquie's Nest"],
   falling_leaves: [
     'falling_leaves',
     'Falling Leaves',
     'Falling Leaves - Resinveil Groove',
   ],
+  floating_cemetery: ['floating_cemetery', 'Floating Cemetery'],
   flying_manor: [
     'flying_manor',
     'Flying Manor',
@@ -87,17 +98,22 @@ const ZONE_ALIASES: Record<string, string[]> = {
   ],
   gestral_village: ['gestral_village', 'Gestral Village'],
   hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
+  isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
   lumiere: ['lumiere', 'Lumiere'],
+  lumiere_prologue: ['lumiere_prologue', 'Lumiere - Prologue'],
   monoco_station: ['monoco_station', "Monoco's Station"],
   old_lumiere: ['old_lumiere', 'Old Lumiere'],
   painting_workshop: ['painting_workshop', 'Painting Workshop'],
+  red_woods: ['red_woods', 'Red Woods'],
   renoir_drafts: [
     'renoir_drafts',
     "Renoir's Drafts",
     "Renoir's Drafts - Entrance",
   ],
   sacred_river: ['sacred_river', 'Sacred River'],
+  sinister_cave: ['sinister_cave', 'Sinister Cave'],
   sirene: ['sirene', 'Sirene'],
+  sirene_dress: ['sirene_dress', "Sirene's Dress"],
   sky_island: ['sky_island', 'Sky Island', 'Sky Island - Entrance'],
   spring_meadows: ['spring_meadows', 'Spring Meadows'],
   stone_wave_cliffs: [
@@ -124,7 +140,6 @@ const ZONE_ALIASES: Record<string, string[]> = {
     'verso_drafts',
     "Verso's Draft",
     "Verso's Drafts",
-    'Verso’s Drafts',
   ],
   visages: ['visages', 'Visages'],
   yellow_harvest: [
@@ -147,7 +162,7 @@ function toZoneLookupKey(value: string): string {
   return value
     .trim()
     .normalize('NFKD')
-    .replace(/[\u2019]/g, "'")
+    .replace(/[\u2019\uFFFD]/g, "'")
     .replace(/[_-]+/g, ' ')
     .replace(/[^a-zA-Z0-9' ]+/g, ' ')
     .replace(/\s+/g, ' ')

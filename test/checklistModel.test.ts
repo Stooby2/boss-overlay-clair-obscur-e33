@@ -21,7 +21,7 @@ const bosses: Boss[] = [
     name: 'scavenger',
     killed: false,
     encountered: true,
-    zone: 'red_woods',
+    zone: 'mystery_woods',
   },
 ]
 
@@ -87,7 +87,17 @@ assert.deepEqual(normalizeZoneName('Verso’s Drafts', 'picto'), {
 })
 
 assert.deepEqual(normalizeZoneName('Floating Cemetery', 'picto'), {
-  zoneName: 'Floating Cemetery',
+  zoneName: 'floating_cemetery',
+  matched: true,
+})
+
+assert.deepEqual(normalizeZoneName('lumiere_prologue', 'boss'), {
+  zoneName: 'lumiere_prologue',
+  matched: true,
+})
+
+assert.deepEqual(normalizeZoneName('mystery_woods', 'boss'), {
+  zoneName: 'mystery_woods',
   matched: false,
 })
 
@@ -119,26 +129,30 @@ assert.ok(versoDrafts)
 assert.equal(versoDrafts.pictos.length, 1)
 assert.equal(versoDrafts.unmatchedEntries.length, 0)
 
-const redWoods = model.zoneGroups.find((zone) => zone.zoneName === 'red_woods')
-assert.ok(redWoods)
-assert.deepEqual(redWoods.unmatchedEntries, [
+const floatingCemetery = model.zoneGroups.find(
+  (zone) => zone.zoneName === 'floating_cemetery',
+)
+assert.ok(floatingCemetery)
+assert.equal(floatingCemetery.pictos.length, 1)
+assert.equal(floatingCemetery.unmatchedEntries.length, 0)
+
+const mysteryWoods = model.zoneGroups.find(
+  (zone) => zone.zoneName === 'mystery_woods',
+)
+assert.ok(mysteryWoods)
+assert.deepEqual(mysteryWoods.unmatchedEntries, [
   {
     source: 'boss',
-    rawName: 'red_woods',
-    fallbackZoneName: 'red_woods',
+    rawName: 'mystery_woods',
+    fallbackZoneName: 'mystery_woods',
   },
 ])
 
 assert.deepEqual(model.unmatchedZoneNames, [
   {
     source: 'boss',
-    rawName: 'red_woods',
-    fallbackZoneName: 'red_woods',
-  },
-  {
-    source: 'picto',
-    rawName: 'Floating Cemetery',
-    fallbackZoneName: 'Floating Cemetery',
+    rawName: 'mystery_woods',
+    fallbackZoneName: 'mystery_woods',
   },
 ])
 
@@ -178,8 +192,7 @@ reportUnmatchedZoneNames(model.unmatchedZoneNames, (message) => {
   logged.push(message)
 })
 
-assert.equal(logged.length, 2)
-assert.match(logged[0], /red_woods/)
-assert.match(logged[1], /Floating Cemetery/)
+assert.equal(logged.length, 1)
+assert.match(logged[0], /mystery_woods/)
 
 console.log('checklistModel tests passed')
