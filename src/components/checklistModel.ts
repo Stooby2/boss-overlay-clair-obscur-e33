@@ -1,8 +1,9 @@
 import type { Boss } from '../types/Boss'
+import type { CurrentLocation } from '../types/CurrentLocation'
 import type { Picto } from '../types/Picto'
 
-export type ZoneSource = 'boss' | 'picto'
-export type ChecklistFilterMode = 'all' | 'found' | 'remaining'
+export type ZoneSource = 'boss' | 'picto' | 'location'
+export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
   zoneName: string
@@ -35,6 +36,7 @@ export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
 export interface ChecklistModel {
   zoneGroups: ChecklistZoneGroup[]
   unmatchedZoneNames: UnmatchedZoneName[]
+  currentZoneName: string | null
 }
 
 export interface ChecklistSummary {
@@ -44,6 +46,8 @@ export interface ChecklistSummary {
   foundPictos: number
   totalPictos: number
   remainingPictos: number
+  currentZoneRemainingBosses: number
+  currentZoneRemainingPictos: number
 }
 
 export interface ChecklistFilterOptions {
@@ -99,10 +103,10 @@ const ZONE_ALIASES: Record<string, string[]> = {
   gestral_village: ['gestral_village', 'Gestral Village'],
   hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
   isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
-  lumiere: ['lumiere', 'Lumiere'],
+  lumiere: ['lumiere', 'Lumiere', 'Lumière'],
   lumiere_prologue: ['lumiere_prologue', 'Lumiere - Prologue'],
   monoco_station: ['monoco_station', "Monoco's Station"],
-  old_lumiere: ['old_lumiere', 'Old Lumiere'],
+  old_lumiere: ['old_lumiere', 'Old Lumiere', 'Old Lumière'],
   painting_workshop: ['painting_workshop', 'Painting Workshop'],
   red_woods: ['red_woods', 'Red Woods'],
   renoir_drafts: [
@@ -112,8 +116,8 @@ const ZONE_ALIASES: Record<string, string[]> = {
   ],
   sacred_river: ['sacred_river', 'Sacred River'],
   sinister_cave: ['sinister_cave', 'Sinister Cave'],
-  sirene: ['sirene', 'Sirene'],
-  sirene_dress: ['sirene_dress', "Sirene's Dress"],
+  sirene: ['sirene', 'Sirene', 'Sirène'],
+  sirene_dress: ['sirene_dress', "Sirene's Dress", "Sirène's Dress"],
   sky_island: ['sky_island', 'Sky Island', 'Sky Island - Entrance'],
   spring_meadows: ['spring_meadows', 'Spring Meadows'],
   stone_wave_cliffs: [
@@ -136,11 +140,7 @@ const ZONE_ALIASES: Record<string, string[]> = {
     'Monolith Peak',
   ],
   the_reacher: ['the_reacher', 'The Reacher'],
-  verso_drafts: [
-    'verso_drafts',
-    "Verso's Draft",
-    "Verso's Drafts",
-  ],
+  verso_drafts: ['verso_drafts', "Verso's Draft", "Verso's Drafts"],
   visages: ['visages', 'Visages'],
   yellow_harvest: [
     'yellow_harvest',
@@ -195,7 +195,7 @@ function bossMatchesFilter(boss: Boss, filterMode: ChecklistFilterMode): boolean
     return boss.encountered && boss.killed
   }
 
-  if (filterMode === 'remaining') {
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
     return !boss.killed
   }
 
@@ -210,7 +210,7 @@ function pictoMatchesFilter(
     return picto.found
   }
 
-  if (filterMode === 'remaining') {
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
     return !picto.found
   }
 
@@ -237,9 +237,42 @@ export function normalizeZoneName(
   }
 }
 
+function normalizeCurrentLocation(
+  currentLocation: CurrentLocation | null | undefined,
+): {
+  currentZoneName: string | null
+  unmatchedLocation: UnmatchedZoneName[]
+} {
+  if (!currentLocation) {
+    return { currentZoneName: null, unmatchedLocation: [] }
+  }
+
+  const rawName = currentLocation.areaName ?? currentLocation.displayName
+  if (!rawName) {
+    return { currentZoneName: null, unmatchedLocation: [] }
+  }
+
+  const normalized = normalizeZoneName(rawName, 'location')
+  if (normalized.matched) {
+    return { currentZoneName: normalized.zoneName, unmatchedLocation: [] }
+  }
+
+  return {
+    currentZoneName: normalized.zoneName,
+    unmatchedLocation: [
+      {
+        source: 'location',
+        rawName,
+        fallbackZoneName: normalized.zoneName,
+      },
+    ],
+  }
+}
+
 export function buildChecklistModel(
   bosses: Boss[],
   pictos: Picto[],
+  currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
   const unmatchedZoneNames: UnmatchedZoneName[] = []
@@ -308,9 +341,13 @@ export function buildChecklistModel(
     }
   }
 
+  const normalizedLocation = normalizeCurrentLocation(currentLocation)
+  unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
+
   return {
     zoneGroups: Array.from(groups.values()),
     unmatchedZoneNames,
+    currentZoneName: normalizedLocation.currentZoneName,
   }
 }
 
@@ -328,6 +365,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     (sum, zone) => sum + zone.foundPictos,
     0,
   )
+  const currentZone = model.currentZoneName
+    ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
+    : null
 
   return {
     killedBosses,
@@ -336,6 +376,12 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundPictos,
     totalPictos,
     remainingPictos: totalPictos - foundPictos,
+    currentZoneRemainingBosses: currentZone
+      ? currentZone.totalBosses - currentZone.killed
+      : 0,
+    currentZoneRemainingPictos: currentZone
+      ? currentZone.totalPictos - currentZone.foundPictos
+      : 0,
   }
 }
 
@@ -346,7 +392,16 @@ export function filterChecklistGroups(
   const searchTerm = options.searchTerm.trim().toLowerCase()
   const translateBossName = options.translateBossName ?? ((value: string) => value)
 
-  return model.zoneGroups
+  let zoneGroups = model.zoneGroups
+  if (options.filterMode === 'current_zone') {
+    if (!model.currentZoneName) {
+      return []
+    }
+
+    zoneGroups = zoneGroups.filter((zone) => zone.zoneName === model.currentZoneName)
+  }
+
+  return zoneGroups
     .map((zone) => {
       const visibleBosses = zone.bosses.filter(
         (boss) =>
