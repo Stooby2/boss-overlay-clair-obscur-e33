@@ -25,6 +25,7 @@ interface AppConfig {
   lastSavePath?: string
   allowManualEditAutoDetected?: boolean
   language?: string
+  backgroundOpacity?: number
 }
 
 interface ManualBossStates {

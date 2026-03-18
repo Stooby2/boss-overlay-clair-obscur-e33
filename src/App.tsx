@@ -7,6 +7,11 @@ import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
+import {
+  DEFAULT_BACKGROUND_OPACITY,
+  getBackgroundColor,
+  normalizeBackgroundOpacity,
+} from './utils/backgroundOpacity'
 
 function App() {
   const { t } = useI18n()
@@ -19,11 +24,17 @@ function App() {
     Record<string, { killed: boolean; encountered: boolean }>
   >({})
   const [allowManualEdit, setAllowManualEdit] = useState(false)
+  const [backgroundOpacity, setBackgroundOpacity] = useState(
+    DEFAULT_BACKGROUND_OPACITY,
+  )
 
   useEffect(() => {
     if (window.electronAPI) {
       window.electronAPI.getConfig().then((config) => {
         setAllowManualEdit(config.allowManualEditAutoDetected ?? false)
+        setBackgroundOpacity(
+          normalizeBackgroundOpacity(config.backgroundOpacity),
+        )
       })
     }
   }, [])
@@ -72,9 +83,13 @@ function App() {
 
   const handleConfigChange = (config: {
     allowManualEditAutoDetected?: boolean
+    backgroundOpacity?: number
   }) => {
     if (config.allowManualEditAutoDetected !== undefined) {
       setAllowManualEdit(config.allowManualEditAutoDetected)
+    }
+    if (config.backgroundOpacity !== undefined) {
+      setBackgroundOpacity(normalizeBackgroundOpacity(config.backgroundOpacity))
     }
   }
 
@@ -140,7 +155,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" style={{ background: getBackgroundColor(backgroundOpacity) }}>
       {isAddingBoss && (
         <BossInfoForm
           boss={{

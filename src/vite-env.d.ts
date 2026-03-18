@@ -22,11 +22,13 @@ declare global {
         lastSavePath?: string
         allowManualEditAutoDetected?: boolean
         language?: string
+        backgroundOpacity?: number
       }>
       saveConfig: (config: {
         lastSavePath?: string
         allowManualEditAutoDetected?: boolean
         language?: string
+        backgroundOpacity?: number
       }) => Promise<{ success: boolean }>
       getManualStates: (
         savePath: string,

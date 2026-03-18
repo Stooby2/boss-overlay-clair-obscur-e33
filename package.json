@@ -20,7 +20,8 @@
     "validate:pictos-acquire": "node tools/validatePictosAcquire.mjs",
     "ts:check": "tsc --noEmit",
     "prepare": "husky",
-    "test:checklist-model": "node --experimental-strip-types test/checklistModel.test.ts"
+    "test:checklist-model": "node --experimental-strip-types test/checklistModel.test.ts",
+    "test:background-opacity": "node --experimental-strip-types test/backgroundOpacity.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
