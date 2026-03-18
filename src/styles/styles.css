@@ -67,14 +67,21 @@ body {
   gap: 12px;
 }
 
-/* Stats */
 .stats {
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   margin-bottom: 8px;
+}
+
+.stats-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .stat-item {
@@ -99,7 +106,18 @@ body {
   color: #3498db;
 }
 
-/* Barre de recherche */
+.add-boss-btn {
+  padding: 6px 12px;
+  background: #2ecc71;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
 .search-input {
   width: 100%;
   padding: 10px 12px;
@@ -121,7 +139,6 @@ body {
   border-color: #3498db;
 }
 
-/* Filtres */
 .filters {
   display: flex;
   gap: 8px;
@@ -129,7 +146,8 @@ body {
 
 .filter-btn {
   flex: 1;
-  padding: 8px;
+  min-width: 0;
+  padding: 8px 10px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
@@ -150,14 +168,16 @@ body {
   font-weight: 600;
 }
 
-/* Liste scrollable */
+.filter-btn-icon {
+  flex: 0 0 44px;
+}
+
 .boss-items {
   overflow-y: auto;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 280px);
   padding-right: 4px;
 }
 
-/* Groupes de zones */
 .zone-group {
   margin-bottom: 12px;
 }
@@ -195,7 +215,7 @@ body {
 
 .zone-stats {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -313,7 +333,6 @@ body {
   margin-bottom: 4px;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }

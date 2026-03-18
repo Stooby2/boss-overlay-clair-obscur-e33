@@ -2,8 +2,10 @@ import assert from 'node:assert/strict'
 
 import {
   buildChecklistModel,
+  filterChecklistGroups,
   normalizeZoneName,
   reportUnmatchedZoneNames,
+  summarizeChecklist,
 } from '../src/components/checklistModel.ts'
 import type { Boss } from '../src/types/Boss.ts'
 import type { Picto } from '../src/types/Picto.ts'
@@ -46,15 +48,15 @@ const pictos: Picto[] = [
     found: false,
     mastered: false,
     level: 1,
-    effect: '',
+    effect: 'Gain Rush after healing.',
     health: '',
     defense: '',
     speed: '',
     criticalRate: '',
     mapName: 'Verso’s Drafts',
-    nearestFlag: '',
-    mapAndNearestFlag: 'Verso’s Drafts ()',
-    howToGet: '',
+    nearestFlag: 'Open Playground',
+    mapAndNearestFlag: 'Verso’s Drafts (Open Playground)',
+    howToGet: 'Follow the right tunnel from the open playground.',
   },
   {
     id: 'CriticalBreak',
@@ -90,6 +92,16 @@ assert.deepEqual(normalizeZoneName('Floating Cemetery', 'picto'), {
 })
 
 const model = buildChecklistModel(bosses, pictos)
+const summary = summarizeChecklist(model)
+assert.deepEqual(summary, {
+  killedBosses: 1,
+  totalBosses: 2,
+  remainingBosses: 1,
+  foundPictos: 1,
+  totalPictos: 3,
+  remainingPictos: 2,
+})
+
 const springMeadows = model.zoneGroups.find(
   (zone) => zone.zoneName === 'spring_meadows',
 )
@@ -117,6 +129,34 @@ assert.deepEqual(model.unmatchedZoneNames, [
     fallbackZoneName: 'Floating Cemetery',
   },
 ])
+
+const foundGroups = filterChecklistGroups(model, {
+  filterMode: 'found',
+  searchTerm: '',
+  translateBossName: (value) => value,
+})
+assert.equal(foundGroups.length, 1)
+assert.equal(foundGroups[0].visibleBosses.length, 1)
+assert.equal(foundGroups[0].visiblePictos.length, 1)
+
+const remainingGroups = filterChecklistGroups(model, {
+  filterMode: 'remaining',
+  searchTerm: 'accelerating heal',
+  translateBossName: (value) => value,
+})
+assert.equal(remainingGroups.length, 1)
+assert.equal(remainingGroups[0].zoneName, 'verso_drafts')
+assert.equal(remainingGroups[0].visibleBosses.length, 0)
+assert.equal(remainingGroups[0].visiblePictos.length, 1)
+
+const searchByWaypoint = filterChecklistGroups(model, {
+  filterMode: 'all',
+  searchTerm: 'open playground',
+  translateBossName: (value) => value,
+})
+assert.equal(searchByWaypoint.length, 1)
+assert.equal(searchByWaypoint[0].zoneName, 'verso_drafts')
+assert.equal(searchByWaypoint[0].visiblePictos[0].friendlyName, 'Accelerating Heal')
 
 const logged: string[] = []
 reportUnmatchedZoneNames(model.unmatchedZoneNames, (message) => {

@@ -5,7 +5,10 @@ import { Boss } from '../types/Boss'
 import { Picto } from '../types/Picto'
 import {
   buildChecklistModel,
+  type ChecklistFilterMode,
+  filterChecklistGroups,
   reportUnmatchedZoneNames,
+  summarizeChecklist,
 } from './checklistModel'
 
 interface Props {
@@ -14,14 +17,6 @@ interface Props {
   onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
-}
-
-interface ZoneGroup {
-  zoneName: string
-  bosses: Boss[]
-  killed: number
-  encountered: number
-  total: number
 }
 
 function BossChecklist({
@@ -33,9 +28,7 @@ function BossChecklist({
 }: Props) {
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterMode, setFilterMode] = useState<
-    'all' | 'alive' | 'killed' | 'encountered'
-  >('all')
+  const [filterMode, setFilterMode] = useState<ChecklistFilterMode>('all')
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
@@ -47,80 +40,42 @@ function BossChecklist({
     reportUnmatchedZoneNames(checklistModel.unmatchedZoneNames)
   }, [checklistModel.unmatchedZoneNames])
 
-  const zoneGroups = useMemo(() => {
-    return checklistModel.zoneGroups
-      .filter((zone) => zone.bosses.length > 0)
-      .map(
-        (zone): ZoneGroup => ({
-          zoneName: zone.zoneName,
-          bosses: zone.bosses,
-          killed: zone.killed,
-          encountered: zone.encountered,
-          total: zone.totalBosses,
-        }),
-      )
-  }, [checklistModel.zoneGroups])
+  const filteredZoneGroups = useMemo(
+    () =>
+      filterChecklistGroups(checklistModel, {
+        filterMode,
+        searchTerm,
+        translateBossName,
+      }),
+    [checklistModel, filterMode, searchTerm, translateBossName],
+  )
 
-  const filteredZoneGroups = useMemo(() => {
-    return zoneGroups
-      .map((zone) => {
-        let filtered = zone.bosses
-
-        if (filterMode === 'alive') {
-          filtered = filtered.filter((boss) => !boss.killed)
-        } else if (filterMode === 'killed') {
-          filtered = filtered.filter((boss) => boss.killed)
-        } else if (filterMode === 'encountered') {
-          filtered = filtered.filter((boss) => boss.encountered)
-        }
-
-        if (searchTerm.trim()) {
-          const term = searchTerm.toLowerCase()
-          filtered = filtered.filter(
-            (boss) =>
-              boss.name.toLowerCase().includes(term) ||
-              translateBossName(boss.name).toLowerCase().includes(term),
-          )
-        }
-
-        return {
-          ...zone,
-          bosses: filtered,
-          visibleTotal: filtered.length,
-        }
-      })
-      .filter((zone) => zone.bosses.length > 0)
-  }, [zoneGroups, searchTerm, filterMode, translateBossName])
-
-  const stats = useMemo(() => {
-    const killed = bosses.filter((b) => b.encountered && b.killed).length
-    const total = bosses.length
-    return { killed, total }
-  }, [bosses])
+  const stats = useMemo(() => summarizeChecklist(checklistModel), [checklistModel])
 
   const toggleZone = (zoneName: string) => {
     setCollapsedZones((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(zoneName)) {
-        newSet.delete(zoneName)
+      const next = new Set(prev)
+      if (next.has(zoneName)) {
+        next.delete(zoneName)
       } else {
-        newSet.add(zoneName)
+        next.add(zoneName)
       }
-      return newSet
+      return next
     })
   }
 
   const toggleAllZones = () => {
-    if (collapsedZones.size === zoneGroups.length) {
+    if (collapsedZones.size === filteredZoneGroups.length) {
       setCollapsedZones(new Set())
-    } else {
-      setCollapsedZones(new Set(zoneGroups.map((z) => z.zoneName)))
+      return
     }
+
+    setCollapsedZones(new Set(filteredZoneGroups.map((zone) => zone.zoneName)))
   }
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -128,26 +83,22 @@ function BossChecklist({
       ) : (
         <>
           <div className="stats">
-            <span className="stat-item killed">
-              {t('bossList.bossesKilled', {
-                killed: stats.killed.toString(),
-                total: stats.total.toString(),
-              })}
-            </span>
+            <div className="stats-summary">
+              <span className="stat-item killed">
+                {t('bossList.bossesKilled', {
+                  killed: stats.killedBosses.toString(),
+                  total: stats.totalBosses.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.pictosCollected', {
+                  found: stats.foundPictos.toString(),
+                  total: stats.totalPictos.toString(),
+                })}
+              </span>
+            </div>
             {onAddBoss && (
-              <button
-                onClick={onAddBoss}
-                style={{
-                  padding: '6px 12px',
-                  background: '#2ecc71',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                }}
-              >
+              <button onClick={onAddBoss} className="add-boss-btn">
                 {t('bossList.addBossManually')}
               </button>
             )}
@@ -166,36 +117,36 @@ function BossChecklist({
               className={`filter-btn ${filterMode === 'all' ? 'active' : ''}`}
               onClick={() => setFilterMode('all')}
             >
-              {t('bossList.filterAll', {
-                count: bosses.filter((b) => b.encountered).length.toString(),
-              })}
+              {t('bossList.filterAll')}
             </button>
             <button
-              className={`filter-btn ${filterMode === 'killed' ? 'active' : ''}`}
-              onClick={() => setFilterMode('killed')}
+              className={`filter-btn ${filterMode === 'found' ? 'active' : ''}`}
+              onClick={() => setFilterMode('found')}
             >
-              {t('bossList.filterKilled', {
-                count: stats.killed.toString(),
+              {t('bossList.filterFound', {
+                bosses: stats.killedBosses.toString(),
+                pictos: stats.foundPictos.toString(),
               })}
             </button>
             <button
-              className={`filter-btn ${filterMode === 'alive' ? 'active' : ''}`}
-              onClick={() => setFilterMode('alive')}
+              className={`filter-btn ${filterMode === 'remaining' ? 'active' : ''}`}
+              onClick={() => setFilterMode('remaining')}
             >
-              {t('bossList.filterAlive', {
-                count: (stats.total - stats.killed).toString(),
+              {t('bossList.filterRemaining', {
+                bosses: stats.remainingBosses.toString(),
+                pictos: stats.remainingPictos.toString(),
               })}
             </button>
             <button
-              className="filter-btn"
+              className="filter-btn filter-btn-icon"
               onClick={toggleAllZones}
               title={
-                collapsedZones.size === zoneGroups.length
+                collapsedZones.size === filteredZoneGroups.length
                   ? t('bossList.expandAll')
                   : t('bossList.collapseAll')
               }
             >
-              {collapsedZones.size === zoneGroups.length ? '📂' : '📁'}
+              {collapsedZones.size === filteredZoneGroups.length ? '📂' : '📁'}
             </button>
           </div>
 
@@ -220,12 +171,12 @@ function BossChecklist({
                         {translateZone(zone.zoneName)}
                       </span>
                       <span className="zone-stats">
-                        ({zone.killed}/{zone.total})
+                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos}
                       </span>
                     </div>
                     {!isCollapsed && (
                       <div className="zone-bosses">
-                        {zone.bosses.map((boss, index) => (
+                        {zone.visibleBosses.map((boss, index) => (
                           <div
                             key={`${zone.zoneName}-${index}`}
                             className={`boss-item ${boss.killed ? 'killed' : ''} ${!boss.encountered ? 'not-encountered' : ''}`}

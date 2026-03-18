@@ -2,6 +2,7 @@ import type { Boss } from '../types/Boss'
 import type { Picto } from '../types/Picto'
 
 export type ZoneSource = 'boss' | 'picto'
+export type ChecklistFilterMode = 'all' | 'found' | 'remaining'
 
 export interface NormalizedZoneMatch {
   zoneName: string
@@ -25,9 +26,29 @@ export interface ChecklistZoneGroup {
   totalPictos: number
 }
 
+export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
+  visibleBosses: Boss[]
+  visiblePictos: Picto[]
+}
+
 export interface ChecklistModel {
   zoneGroups: ChecklistZoneGroup[]
   unmatchedZoneNames: UnmatchedZoneName[]
+}
+
+export interface ChecklistSummary {
+  killedBosses: number
+  totalBosses: number
+  remainingBosses: number
+  foundPictos: number
+  totalPictos: number
+  remainingPictos: number
+}
+
+export interface ChecklistFilterOptions {
+  filterMode: ChecklistFilterMode
+  searchTerm: string
+  translateBossName?: (bossName: string) => string
 }
 
 const DEFAULT_ZONE_NAME = 'uncategorized'
@@ -132,6 +153,54 @@ function toZoneLookupKey(value: string): string {
     .toLowerCase()
 }
 
+function bossMatchesSearch(
+  boss: Boss,
+  term: string,
+  translateBossName: (bossName: string) => string,
+): boolean {
+  return (
+    boss.name.toLowerCase().includes(term) ||
+    translateBossName(boss.name).toLowerCase().includes(term)
+  )
+}
+
+function pictoMatchesSearch(picto: Picto, term: string): boolean {
+  return [
+    picto.friendlyName,
+    picto.effect,
+    picto.mapName,
+    picto.nearestFlag,
+    picto.howToGet,
+  ].some((value) => value.toLowerCase().includes(term))
+}
+
+function bossMatchesFilter(boss: Boss, filterMode: ChecklistFilterMode): boolean {
+  if (filterMode === 'found') {
+    return boss.encountered && boss.killed
+  }
+
+  if (filterMode === 'remaining') {
+    return !boss.killed
+  }
+
+  return true
+}
+
+function pictoMatchesFilter(
+  picto: Picto,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return picto.found
+  }
+
+  if (filterMode === 'remaining') {
+    return !picto.found
+  }
+
+  return true
+}
+
 export function normalizeZoneName(
   rawName: string | undefined,
   _source: ZoneSource,
@@ -222,6 +291,64 @@ export function buildChecklistModel(
     zoneGroups: Array.from(groups.values()),
     unmatchedZoneNames,
   }
+}
+
+export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
+  const totalBosses = model.zoneGroups.reduce(
+    (sum, zone) => sum + zone.totalBosses,
+    0,
+  )
+  const killedBosses = model.zoneGroups.reduce((sum, zone) => sum + zone.killed, 0)
+  const totalPictos = model.zoneGroups.reduce(
+    (sum, zone) => sum + zone.totalPictos,
+    0,
+  )
+  const foundPictos = model.zoneGroups.reduce(
+    (sum, zone) => sum + zone.foundPictos,
+    0,
+  )
+
+  return {
+    killedBosses,
+    totalBosses,
+    remainingBosses: totalBosses - killedBosses,
+    foundPictos,
+    totalPictos,
+    remainingPictos: totalPictos - foundPictos,
+  }
+}
+
+export function filterChecklistGroups(
+  model: ChecklistModel,
+  options: ChecklistFilterOptions,
+): FilteredChecklistZoneGroup[] {
+  const searchTerm = options.searchTerm.trim().toLowerCase()
+  const translateBossName = options.translateBossName ?? ((value: string) => value)
+
+  return model.zoneGroups
+    .map((zone) => {
+      const visibleBosses = zone.bosses.filter(
+        (boss) =>
+          bossMatchesFilter(boss, options.filterMode) &&
+          (searchTerm.length === 0 ||
+            bossMatchesSearch(boss, searchTerm, translateBossName)),
+      )
+
+      const visiblePictos = zone.pictos.filter(
+        (picto) =>
+          pictoMatchesFilter(picto, options.filterMode) &&
+          (searchTerm.length === 0 || pictoMatchesSearch(picto, searchTerm)),
+      )
+
+      return {
+        ...zone,
+        visibleBosses,
+        visiblePictos,
+      }
+    })
+    .filter(
+      (zone) => zone.visibleBosses.length > 0 || zone.visiblePictos.length > 0,
+    )
 }
 
 export function reportUnmatchedZoneNames(
