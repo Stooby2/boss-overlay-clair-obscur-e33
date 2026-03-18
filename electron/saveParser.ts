@@ -8,6 +8,12 @@ import { promisify } from 'util'
 import type { Boss } from '../src/types/Boss.js'
 import type { SaveSnapshot } from '../src/types/SaveSnapshot.js'
 import {
+  extractJournals,
+  type JournalCatalogFile,
+  type JournalLocationFile,
+  type JournalSaveData,
+} from './journals.js'
+import {
   extractCurrentLocation,
   type LocationCatalogFile,
   type LocationSaveData,
@@ -45,6 +51,8 @@ let bossMap: Map<string, { id: string; category: string; zone: string }> | null 
 let pictoCatalog: Record<string, string> | null = null
 let pictoAcquireInfo: Map<string, PictoAcquireInfo> | null = null
 let locationCatalog: LocationCatalogFile | null = null
+let journalCatalog: JournalCatalogFile['Journals'] | null = null
+let journalLocations: JournalLocationFile['Journals'] | null = null
 let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
   null
 let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
@@ -65,7 +73,7 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData extends LocationSaveData, MonocoFeetSaveData {
+interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData {
   root: {
     properties: PictoSaveProperties & {
       MapToLoad_0?: {
@@ -205,6 +213,38 @@ async function loadPictoData() {
   }
 }
 
+async function loadJournalData() {
+  if (journalCatalog && journalLocations) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('journals.json')
+    const locationsPath = getDataPath('journal_locations.json')
+    console.log('Loading journal catalog from:', catalogPath)
+    console.log('Loading journal locations from:', locationsPath)
+
+    const [catalogContent, locationsContent] = await Promise.all([
+      readFile(catalogPath, 'utf-8'),
+      readFile(locationsPath, 'utf-8'),
+    ])
+
+    const parsedCatalog = JSON.parse(catalogContent) as JournalCatalogFile
+    const parsedLocations = JSON.parse(locationsContent) as JournalLocationFile
+
+    journalCatalog = parsedCatalog.Journals
+    journalLocations = parsedLocations.Journals
+
+    console.log(
+      `Loaded ${Object.keys(journalCatalog).length} journals with ${Object.keys(journalLocations).length} location entries`,
+    )
+  } catch (error) {
+    console.error('Failed to load journal data:', error)
+    journalCatalog = {}
+    journalLocations = {}
+  }
+}
+
 async function loadMonocoFeetData() {
   if (monocoFeetCatalog && monocoFeetMetadata) {
     return
@@ -294,6 +334,10 @@ function createFallbackSnapshot(): SaveSnapshot {
       monocoFeetCatalog && monocoFeetMetadata
         ? extractMonocoFeet({}, monocoFeetCatalog, monocoFeetMetadata)
         : [],
+    journals:
+      journalCatalog && journalLocations
+        ? extractJournals({}, journalCatalog, journalLocations)
+        : [],
     location: null,
   }
 }
@@ -309,6 +353,10 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
       monocoFeetCatalog && monocoFeetMetadata
         ? extractMonocoFeet(saveData, monocoFeetCatalog, monocoFeetMetadata)
         : [],
+    journals:
+      journalCatalog && journalLocations
+        ? extractJournals(saveData, journalCatalog, journalLocations)
+        : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -317,6 +365,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadBossDatabase()
   await loadLocationData()
   await loadPictoData()
+  await loadJournalData()
   await loadMonocoFeetData()
 
   try {
