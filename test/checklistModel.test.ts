@@ -110,12 +110,24 @@ assert.equal(springMeadows.bosses.length, 1)
 assert.equal(springMeadows.pictos.length, 1)
 assert.equal(springMeadows.killed, 1)
 assert.equal(springMeadows.totalPictos, 1)
+assert.equal(springMeadows.unmatchedEntries.length, 0)
 
 const versoDrafts = model.zoneGroups.find(
   (zone) => zone.zoneName === 'verso_drafts',
 )
 assert.ok(versoDrafts)
 assert.equal(versoDrafts.pictos.length, 1)
+assert.equal(versoDrafts.unmatchedEntries.length, 0)
+
+const redWoods = model.zoneGroups.find((zone) => zone.zoneName === 'red_woods')
+assert.ok(redWoods)
+assert.deepEqual(redWoods.unmatchedEntries, [
+  {
+    source: 'boss',
+    rawName: 'red_woods',
+    fallbackZoneName: 'red_woods',
+  },
+])
 
 assert.deepEqual(model.unmatchedZoneNames, [
   {

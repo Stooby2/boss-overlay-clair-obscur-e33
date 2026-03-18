@@ -42,7 +42,9 @@
     "noNearestFlag": "No nearest flag recorded",
     "noHowToGet": "No acquisition notes recorded",
     "pictoFound": "FOUND",
-    "pictoMissing": "MISSING"
+    "pictoMissing": "MISSING",
+    "unmappedLocationBadge": "Unmapped",
+    "unmappedLocationLabel": "Needs zone mapping"
   },
   "bossForm": {
     "editTitle": "✏️ Edit boss",

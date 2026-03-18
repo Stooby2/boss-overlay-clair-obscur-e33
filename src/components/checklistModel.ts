@@ -24,6 +24,7 @@ export interface ChecklistZoneGroup {
   totalBosses: number
   foundPictos: number
   totalPictos: number
+  unmatchedEntries: UnmatchedZoneName[]
 }
 
 export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
@@ -243,6 +244,7 @@ export function buildChecklistModel(
       totalBosses: 0,
       foundPictos: 0,
       totalPictos: 0,
+      unmatchedEntries: [],
     }
     groups.set(zoneName, created)
     return created
@@ -261,11 +263,13 @@ export function buildChecklistModel(
     }
 
     if (!normalized.matched && (boss.zone?.trim() ?? '').length > 0) {
-      unmatchedZoneNames.push({
-        source: 'boss',
+      const unmatched = {
+        source: 'boss' as const,
         rawName: boss.zone!.trim(),
         fallbackZoneName: normalized.zoneName,
-      })
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
     }
   }
 
@@ -279,11 +283,13 @@ export function buildChecklistModel(
     }
 
     if (!normalized.matched && picto.mapName.trim().length > 0) {
-      unmatchedZoneNames.push({
-        source: 'picto',
+      const unmatched = {
+        source: 'picto' as const,
         rawName: picto.mapName.trim(),
         fallbackZoneName: normalized.zoneName,
-      })
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
     }
   }
 

@@ -21,7 +21,6 @@ interface Props {
 
 interface BossRowProps {
   boss: Boss
-  zoneName: string
   allowManualEdit: boolean
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   translateBossName: (bossName: string) => string
@@ -35,7 +34,6 @@ interface PictoRowProps {
 
 function BossRow({
   boss,
-  zoneName,
   allowManualEdit,
   onToggleBoss,
   translateBossName,
@@ -51,7 +49,6 @@ function BossRow({
 
   return (
     <div
-      key={`${zoneName}-${boss.originalName ?? boss.name}`}
       className={`boss-item ${boss.killed ? 'killed' : ''} ${!boss.encountered ? 'not-encountered' : ''}`}
     >
       <span
@@ -247,10 +244,13 @@ function BossChecklist({
             ) : (
               filteredZoneGroups.map((zone) => {
                 const isCollapsed = collapsedZones.has(zone.zoneName)
+                const unmatchedNames = [
+                  ...new Set(zone.unmatchedEntries.map((entry) => entry.rawName)),
+                ]
                 return (
                   <div key={zone.zoneName} className="zone-group">
                     <div
-                      className="zone-header"
+                      className={`zone-header ${unmatchedNames.length > 0 ? 'zone-header-unmapped' : ''}`}
                       onClick={() => toggleZone(zone.zoneName)}
                     >
                       <span className="zone-toggle">
@@ -259,17 +259,29 @@ function BossChecklist({
                       <span className="zone-name">
                         {translateZone(zone.zoneName)}
                       </span>
+                      {unmatchedNames.length > 0 && (
+                        <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
+                      )}
                       <span className="zone-stats">
                         B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos}
                       </span>
                     </div>
                     {!isCollapsed && (
                       <div className="zone-items">
+                        {unmatchedNames.length > 0 && (
+                          <div className="zone-audit">
+                            <span className="zone-audit-label">
+                              {t('bossList.unmappedLocationLabel')}
+                            </span>
+                            <span className="zone-audit-value">
+                              {unmatchedNames.join(', ')}
+                            </span>
+                          </div>
+                        )}
                         {zone.visibleBosses.map((boss) => (
                           <BossRow
                             key={`${zone.zoneName}-${boss.originalName ?? boss.name}`}
                             boss={boss}
-                            zoneName={zone.zoneName}
                             allowManualEdit={allowManualEdit}
                             onToggleBoss={onToggleBoss}
                             translateBossName={translateBossName}
