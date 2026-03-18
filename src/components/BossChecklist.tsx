@@ -162,6 +162,7 @@ function BossChecklist(props: Props) {
     bosses,
     pictos,
     monocoFeet,
+    journals,
     currentLocation,
     filterMode,
     onFilterModeChange,
@@ -174,8 +175,8 @@ function BossChecklist(props: Props) {
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
-    () => buildChecklistModel(bosses, pictos, monocoFeet, currentLocation),
-    [bosses, pictos, monocoFeet, currentLocation],
+    () => buildChecklistModel(bosses, pictos, monocoFeet, journals, currentLocation),
+    [bosses, pictos, monocoFeet, journals, currentLocation],
   )
 
   useEffect(() => {
@@ -193,6 +194,17 @@ function BossChecklist(props: Props) {
   )
 
   const stats = useMemo(() => summarizeChecklist(checklistModel), [checklistModel])
+
+  const renderedZoneGroups = useMemo(
+    () =>
+      filteredZoneGroups.filter(
+        (zone) =>
+          zone.visibleBosses.length > 0 ||
+          zone.visiblePictos.length > 0 ||
+          zone.visibleMonocoFeet.length > 0,
+      ),
+    [filteredZoneGroups],
+  )
 
   const currentLocationLabel =
     currentLocation?.areaName ??
@@ -212,12 +224,12 @@ function BossChecklist(props: Props) {
   }
 
   const toggleAllZones = () => {
-    if (collapsedZones.size === filteredZoneGroups.length) {
+    if (collapsedZones.size === renderedZoneGroups.length) {
       setCollapsedZones(new Set())
       return
     }
 
-    setCollapsedZones(new Set(filteredZoneGroups.map((zone) => zone.zoneName)))
+    setCollapsedZones(new Set(renderedZoneGroups.map((zone) => zone.zoneName)))
   }
 
   return (
@@ -323,12 +335,12 @@ function BossChecklist(props: Props) {
           </div>
 
           <div className="boss-items">
-            {filteredZoneGroups.length === 0 ? (
+            {renderedZoneGroups.length === 0 ? (
               <div className="empty">
                 <p>{t('bossList.noResults')}</p>
               </div>
             ) : (
-              filteredZoneGroups.map((zone) => {
+              renderedZoneGroups.map((zone) => {
                 const isCollapsed = collapsedZones.has(zone.zoneName)
                 const unmatchedNames = [
                   ...new Set(zone.unmatchedEntries.map((entry) => entry.rawName)),

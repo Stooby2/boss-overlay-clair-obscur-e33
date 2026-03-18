@@ -13,6 +13,7 @@ import {
 } from '../src/components/checklistModel.ts'
 import type { Boss } from '../src/types/Boss.ts'
 import type { CurrentLocation } from '../src/types/CurrentLocation.ts'
+import type { JournalEntry } from '../src/types/JournalEntry.ts'
 import type { MonocoFoot } from '../src/types/MonocoFoot.ts'
 import type { Picto } from '../src/types/Picto.ts'
 
@@ -134,6 +135,36 @@ const monocoFeet: MonocoFoot[] = [
   },
 ]
 
+const journals: JournalEntry[] = [
+  {
+    id: 'Journal_Exp81',
+    name: 'Journal - Expedition 81',
+    found: true,
+    count: 1,
+    zoneName: 'spring_meadows',
+    sourceZoneName: 'Spring Meadows',
+    summary: 'Main story cutscene in Spring Meadows; unmissable.',
+  },
+  {
+    id: 'Journal_Debug_Floating',
+    name: 'Journal - Forgotten Notes',
+    found: false,
+    count: 0,
+    zoneName: 'floating_cemetery',
+    sourceZoneName: 'Floating Cemetery',
+    summary: 'Search the western memorial alcove.',
+  },
+  {
+    id: 'Journal_Exp53',
+    name: 'Journal - Expedition 53',
+    found: false,
+    count: 0,
+    zoneName: 'the_small_bourgeon',
+    sourceZoneName: 'The Small Bourgeon',
+    summary: 'Deep in the Bourgeon cave after the conversation.',
+  },
+]
+
 const currentLocation: CurrentLocation = {
   levelKey: 'Level_Sirene_Main_V2',
   spawnTag: 'Level.SpawnPoint.Generic.Dynamic',
@@ -158,6 +189,11 @@ assert.deepEqual(normalizeZoneName('Floating Cemetery', 'picto'), {
   matched: true,
 })
 
+assert.deepEqual(normalizeZoneName('The Small Bourgeon', 'journal'), {
+  zoneName: 'the_small_bourgeon',
+  matched: true,
+})
+
 assert.deepEqual(normalizeZoneName("Monoco's Station", 'foot'), {
   zoneName: 'monoco_station',
   matched: true,
@@ -178,7 +214,7 @@ assert.deepEqual(normalizeZoneName('mystery_woods', 'boss'), {
   matched: false,
 })
 
-const model = buildChecklistModel(bosses, pictos, monocoFeet, currentLocation)
+const model = buildChecklistModel(bosses, pictos, monocoFeet, journals, currentLocation)
 const summary = summarizeChecklist(model)
 assert.deepEqual(summary, {
   killedBosses: 1,
@@ -190,9 +226,13 @@ assert.deepEqual(summary, {
   foundFeet: 1,
   totalFeet: 3,
   remainingFeet: 2,
+  foundJournals: 1,
+  totalJournals: 3,
+  remainingJournals: 2,
   currentZoneRemainingBosses: 0,
   currentZoneRemainingPictos: 1,
   currentZoneRemainingFeet: 1,
+  currentZoneRemainingJournals: 1,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
 assert.deepEqual(
@@ -203,6 +243,7 @@ assert.deepEqual(
     'floating_cemetery',
     'verso_drafts',
     'mystery_woods',
+    'the_small_bourgeon',
     'the_continent',
   ],
 )
@@ -217,6 +258,8 @@ assert.equal(springMeadows.monocoFeet.length, 1)
 assert.equal(springMeadows.killed, 1)
 assert.equal(springMeadows.totalPictos, 1)
 assert.equal(springMeadows.totalFeet, 1)
+assert.equal(springMeadows.totalJournals, 1)
+assert.equal(springMeadows.foundJournals, 1)
 assert.equal(springMeadows.unmatchedEntries.length, 0)
 assert.equal(springMeadows.recommendedMinLevel, 0)
 assert.equal(springMeadows.recommendedMaxLevel, 0)
@@ -237,9 +280,16 @@ assert.equal(floatingCemetery.pictos.length, 1)
 assert.equal(floatingCemetery.monocoFeet.length, 2)
 assert.equal(floatingCemetery.foundFeet, 1)
 assert.equal(floatingCemetery.totalFeet, 2)
+assert.equal(floatingCemetery.totalJournals, 1)
+assert.equal(floatingCemetery.foundJournals, 0)
 assert.equal(floatingCemetery.unmatchedEntries.length, 0)
 assert.equal(floatingCemetery.recommendedMinLevel, 60)
 assert.equal(floatingCemetery.recommendedMaxLevel, 70)
+
+const theSmallBourgeon = model.zoneGroups.find((zone) => zone.zoneName === 'the_small_bourgeon')
+assert.ok(theSmallBourgeon)
+assert.equal(theSmallBourgeon.totalJournals, 1)
+assert.equal(theSmallBourgeon.foundJournals, 0)
 
 const theContinent = model.zoneGroups.find((zone) => zone.zoneName === 'the_continent')
 assert.ok(theContinent)
@@ -278,6 +328,10 @@ assert.equal(
   foundGroups[0].visibleMonocoFeet.length + foundGroups[1].visibleMonocoFeet.length,
   1,
 )
+assert.equal(
+  foundGroups.reduce((sum, zone) => sum + zone.visibleJournals.length, 0),
+  1,
+)
 
 const remainingGroups = filterChecklistGroups(model, {
   filterMode: 'remaining',
@@ -304,6 +358,8 @@ assert.equal(currentZoneGroups[0].visiblePictos.length, 1)
 assert.equal(currentZoneGroups[0].visiblePictos[0].friendlyName, 'Critical Break')
 assert.equal(currentZoneGroups[0].visibleMonocoFeet.length, 1)
 assert.equal(currentZoneGroups[0].visibleMonocoFeet[0].skillName, 'Cultist Blood')
+assert.equal(currentZoneGroups[0].visibleJournals.length, 1)
+assert.equal(currentZoneGroups[0].visibleJournals[0].name, 'Journal - Forgotten Notes')
 
 const currentZoneSearchMiss = filterChecklistGroups(model, {
   filterMode: 'current_zone',
@@ -311,6 +367,15 @@ const currentZoneSearchMiss = filterChecklistGroups(model, {
   translateBossName: (value) => value,
 })
 assert.equal(currentZoneSearchMiss.length, 0)
+
+const searchByJournalSummary = filterChecklistGroups(model, {
+  filterMode: 'all',
+  searchTerm: 'bourgeon cave',
+  translateBossName: (value) => value,
+})
+assert.equal(searchByJournalSummary.length, 1)
+assert.equal(searchByJournalSummary[0].zoneName, 'the_small_bourgeon')
+assert.equal(searchByJournalSummary[0].visibleJournals.length, 1)
 
 const searchByMonsterName = filterChecklistGroups(model, {
   filterMode: 'all',
@@ -323,7 +388,7 @@ assert.equal(
   2,
 )
 
-const unresolvedCurrentZone = buildChecklistModel(bosses, pictos, monocoFeet, {
+const unresolvedCurrentZone = buildChecklistModel(bosses, pictos, monocoFeet, journals, {
   levelKey: 'Level_Unknown_Debug',
   spawnTag: 'Level.SpawnPoint.Unknown.Debug',
   areaName: 'Mystery Depths',

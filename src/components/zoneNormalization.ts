@@ -42,6 +42,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
     'Frozen Hearts',
     'Frozen Hearts - Glacial Falls',
   ],
+  gestral_beach: ['gestral_beach', 'Gestral Beach'],
   gestral_village: ['gestral_village', 'Gestral Village'],
   hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
   isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
@@ -62,6 +63,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
   sirene_dress: ['sirene_dress', "Sirene's Dress", "Sir\u00e8ne's Dress"],
   sky_island: ['sky_island', 'Sky Island', 'Sky Island - Entrance'],
   spring_meadows: ['spring_meadows', 'Spring Meadows'],
+  stone_quarry: ['stone_quarry', 'Stone Quarry'],
   stone_wave_cliffs: [
     'stone_wave_cliffs',
     'Stone Wave Cliffs',
@@ -73,6 +75,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
   ],
   sunless_cliffs: ['sunless_cliffs', 'Sunless Cliffs'],
   the_chosen_path: ['the_chosen_path', 'The Chosen Path'],
+  the_fountain: ['the_fountain', 'The Fountain'],
   the_continent: ['the_continent', 'The Continent'],
   the_crows: ['the_crows', 'The Crows'],
   the_monolith: [
@@ -82,8 +85,10 @@ export const ZONE_ALIASES: Record<string, string[]> = {
     'Monolith Peak',
   ],
   the_reacher: ['the_reacher', 'The Reacher'],
+  the_small_bourgeon: ['the_small_bourgeon', 'The Small Bourgeon'],
   verso_drafts: ['verso_drafts', "Verso's Draft", "Verso's Drafts"],
   visages: ['visages', 'Visages'],
+  white_tree: ['white_tree', 'White Tree'],
   yellow_harvest: [
     'yellow_harvest',
     'Yellow Harvest',

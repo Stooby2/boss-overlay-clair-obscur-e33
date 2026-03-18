@@ -1,11 +1,12 @@
-﻿import type { Boss } from '../types/Boss'
+import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { JournalEntry } from '../types/JournalEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
 import { zoneLevelsByZoneName } from './zoneLevels.ts'
 import { DEFAULT_ZONE_NAME, toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
-export type ZoneSource = 'boss' | 'picto' | 'foot' | 'location'
+export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
@@ -24,6 +25,7 @@ export interface ChecklistZoneGroup {
   bosses: Boss[]
   pictos: Picto[]
   monocoFeet: MonocoFoot[]
+  journals: JournalEntry[]
   killed: number
   encountered: number
   totalBosses: number
@@ -31,6 +33,8 @@ export interface ChecklistZoneGroup {
   totalPictos: number
   foundFeet: number
   totalFeet: number
+  foundJournals: number
+  totalJournals: number
   recommendedMinLevel?: number
   recommendedMaxLevel?: number
   unmatchedEntries: UnmatchedZoneName[]
@@ -40,6 +44,7 @@ export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
   visibleBosses: Boss[]
   visiblePictos: Picto[]
   visibleMonocoFeet: MonocoFoot[]
+  visibleJournals: JournalEntry[]
 }
 
 export interface ChecklistModel {
@@ -47,6 +52,7 @@ export interface ChecklistModel {
   unmatchedZoneNames: UnmatchedZoneName[]
   currentZoneName: string | null
   monocoFeet: MonocoFoot[]
+  journals: JournalEntry[]
 }
 
 export interface ChecklistSummary {
@@ -59,9 +65,13 @@ export interface ChecklistSummary {
   foundFeet: number
   totalFeet: number
   remainingFeet: number
+  foundJournals: number
+  totalJournals: number
+  remainingJournals: number
   currentZoneRemainingBosses: number
   currentZoneRemainingPictos: number
   currentZoneRemainingFeet: number
+  currentZoneRemainingJournals: number
 }
 
 export interface ChecklistFilterOptions {
@@ -106,6 +116,12 @@ function monocoFootMatchesSearch(foot: MonocoFoot, term: string): boolean {
   )
 }
 
+function journalMatchesSearch(journal: JournalEntry, term: string): boolean {
+  return [journal.name, journal.sourceZoneName, journal.summary].some((value) =>
+    value.toLowerCase().includes(term),
+  )
+}
+
 function bossMatchesFilter(boss: Boss, filterMode: ChecklistFilterMode): boolean {
   if (filterMode === 'found') {
     return boss.encountered && boss.killed
@@ -143,6 +159,21 @@ function monocoFootMatchesFilter(
 
   if (filterMode === 'remaining' || filterMode === 'current_zone') {
     return !foot.found
+  }
+
+  return true
+}
+
+function journalMatchesFilter(
+  journal: JournalEntry,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return journal.found
+  }
+
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
+    return !journal.found
   }
 
   return true
@@ -238,6 +269,7 @@ export function buildChecklistModel(
   bosses: Boss[],
   pictos: Picto[],
   monocoFeet: MonocoFoot[],
+  journals: JournalEntry[],
   currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
@@ -254,6 +286,7 @@ export function buildChecklistModel(
       bosses: [],
       pictos: [],
       monocoFeet: [],
+      journals: [],
       killed: 0,
       encountered: 0,
       totalBosses: 0,
@@ -261,6 +294,8 @@ export function buildChecklistModel(
       totalPictos: 0,
       foundFeet: 0,
       totalFeet: 0,
+      foundJournals: 0,
+      totalJournals: 0,
       recommendedMinLevel: zoneLevelsByZoneName[zoneName]?.recommendedMinLevel,
       recommendedMaxLevel: zoneLevelsByZoneName[zoneName]?.recommendedMaxLevel,
       unmatchedEntries: [],
@@ -342,6 +377,26 @@ export function buildChecklistModel(
     }
   }
 
+  for (const journal of journals) {
+    const normalized = normalizeZoneName(journal.zoneName, 'journal')
+    const group = getOrCreateGroup(normalized.zoneName)
+    group.journals.push(journal)
+    group.totalJournals += 1
+    if (journal.found) {
+      group.foundJournals += 1
+    }
+
+    if (!normalized.matched && journal.zoneName.trim().length > 0) {
+      const unmatched = {
+        source: 'journal' as const,
+        rawName: journal.zoneName.trim(),
+        fallbackZoneName: normalized.zoneName,
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
+    }
+  }
+
   const normalizedLocation = normalizeCurrentLocation(currentLocation)
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
@@ -350,6 +405,7 @@ export function buildChecklistModel(
     unmatchedZoneNames,
     currentZoneName: normalizedLocation.currentZoneName,
     monocoFeet,
+    journals,
   }
 }
 
@@ -369,6 +425,8 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
   )
   const totalFeet = model.monocoFeet.length
   const foundFeet = model.monocoFeet.filter((foot) => foot.found).length
+  const totalJournals = model.journals.length
+  const foundJournals = model.journals.filter((journal) => journal.found).length
   const currentZone = model.currentZoneName
     ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
     : null
@@ -383,6 +441,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundFeet,
     totalFeet,
     remainingFeet: totalFeet - foundFeet,
+    foundJournals,
+    totalJournals,
+    remainingJournals: totalJournals - foundJournals,
     currentZoneRemainingBosses: currentZone
       ? currentZone.totalBosses - currentZone.killed
       : 0,
@@ -391,6 +452,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
       : 0,
     currentZoneRemainingFeet: currentZone
       ? currentZone.totalFeet - currentZone.foundFeet
+      : 0,
+    currentZoneRemainingJournals: currentZone
+      ? currentZone.totalJournals - currentZone.foundJournals
       : 0,
   }
 }
@@ -432,18 +496,26 @@ export function filterChecklistGroups(
           (searchTerm.length === 0 || monocoFootMatchesSearch(foot, searchTerm)),
       )
 
+      const visibleJournals = zone.journals.filter(
+        (journal) =>
+          journalMatchesFilter(journal, options.filterMode) &&
+          (searchTerm.length === 0 || journalMatchesSearch(journal, searchTerm)),
+      )
+
       return {
         ...zone,
         visibleBosses,
         visiblePictos,
         visibleMonocoFeet,
+        visibleJournals,
       }
     })
     .filter(
       (zone) =>
         zone.visibleBosses.length > 0 ||
         zone.visiblePictos.length > 0 ||
-        zone.visibleMonocoFeet.length > 0,
+        zone.visibleMonocoFeet.length > 0 ||
+        zone.visibleJournals.length > 0,
     )
 }
 
