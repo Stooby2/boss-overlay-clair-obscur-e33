@@ -219,10 +219,11 @@ body {
   font-weight: 500;
 }
 
-.zone-bosses {
+.zone-items {
   padding-left: 20px;
   margin-top: 8px;
 }
+
 
 .boss-item {
   display: flex;
@@ -348,4 +349,75 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.picto-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid #f39c12;
+}
+
+.picto-item.found {
+  border-left-color: #2ecc71;
+  opacity: 0.8;
+}
+
+.picto-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.picto-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.picto-status {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.picto-status.found {
+  background: rgba(46, 204, 113, 0.2);
+  color: #7dffb0;
+}
+
+.picto-status.missing {
+  background: rgba(243, 156, 18, 0.18);
+  color: #ffd38a;
+}
+
+.picto-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.picto-label {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.picto-value {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.picto-description .picto-value {
+  color: rgba(255, 255, 255, 0.74);
 }

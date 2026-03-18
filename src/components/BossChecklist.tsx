@@ -19,6 +19,95 @@ interface Props {
   allowManualEdit?: boolean
 }
 
+interface BossRowProps {
+  boss: Boss
+  zoneName: string
+  allowManualEdit: boolean
+  onToggleBoss?: (boss: Boss, killed: boolean) => void
+  translateBossName: (bossName: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
+interface PictoRowProps {
+  picto: Picto
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
+function BossRow({
+  boss,
+  zoneName,
+  allowManualEdit,
+  onToggleBoss,
+  translateBossName,
+  t,
+}: BossRowProps) {
+  const isManualBoss = boss.originalName?.startsWith('MANUAL_')
+  const canToggle = isManualBoss || allowManualEdit
+  const tooltipText = !canToggle
+    ? t('bossList.autoDetected')
+    : boss.killed
+      ? t('bossList.markAsAlive')
+      : t('bossList.markAsKilled')
+
+  return (
+    <div
+      key={`${zoneName}-${boss.originalName ?? boss.name}`}
+      className={`boss-item ${boss.killed ? 'killed' : ''} ${!boss.encountered ? 'not-encountered' : ''}`}
+    >
+      <span
+        className="checkbox"
+        onClick={() => canToggle && onToggleBoss?.(boss, !boss.killed)}
+        style={{
+          cursor: canToggle && onToggleBoss ? 'pointer' : 'not-allowed',
+          opacity: canToggle ? 1 : 0.5,
+        }}
+        title={tooltipText}
+      >
+        {boss.killed ? '☑' : boss.encountered ? '☐' : '⬜'}
+      </span>
+      <span className="name">
+        {translateBossName(boss.name)}
+        {boss.originalName?.startsWith('MANUAL_') && (
+          <span
+            style={{
+              marginLeft: '6px',
+              fontSize: '11px',
+              opacity: 0.7,
+            }}
+            title={t('bossList.manuallyAdded')}
+          >
+            🔧
+          </span>
+        )}
+      </span>
+    </div>
+  )
+}
+
+function PictoRow({ picto, t }: PictoRowProps) {
+  const nearestFlag = picto.nearestFlag || t('bossList.noNearestFlag')
+  const howToGet = picto.howToGet || t('bossList.noHowToGet')
+
+  return (
+    <div className={`picto-item ${picto.found ? 'found' : 'missing'}`}>
+      <div className="picto-header">
+        <span className="picto-name">{picto.friendlyName}</span>
+        <span className={`picto-status ${picto.found ? 'found' : 'missing'}`}>
+          {picto.found ? t('bossList.pictoFound') : t('bossList.pictoMissing')}
+        </span>
+      </div>
+      <div className="picto-meta">
+        <span className="picto-label">{t('bossList.nearestFlagLabel')}</span>
+        <span className="picto-value">{nearestFlag}</span>
+      </div>
+      <div className="picto-meta picto-description">
+        <span className="picto-label">{t('bossList.howToGetLabel')}</span>
+        <span className="picto-value">{howToGet}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist({
   bosses,
   pictos,
@@ -175,62 +264,20 @@ function BossChecklist({
                       </span>
                     </div>
                     {!isCollapsed && (
-                      <div className="zone-bosses">
-                        {zone.visibleBosses.map((boss, index) => (
-                          <div
-                            key={`${zone.zoneName}-${index}`}
-                            className={`boss-item ${boss.killed ? 'killed' : ''} ${!boss.encountered ? 'not-encountered' : ''}`}
-                          >
-                            {(() => {
-                              const isManualBoss =
-                                boss.originalName?.startsWith('MANUAL_')
-                              const canToggle = isManualBoss || allowManualEdit
-                              const tooltipText = !canToggle
-                                ? t('bossList.autoDetected')
-                                : boss.killed
-                                  ? t('bossList.markAsAlive')
-                                  : t('bossList.markAsKilled')
-
-                              return (
-                                <span
-                                  className="checkbox"
-                                  onClick={() =>
-                                    canToggle &&
-                                    onToggleBoss?.(boss, !boss.killed)
-                                  }
-                                  style={{
-                                    cursor:
-                                      canToggle && onToggleBoss
-                                        ? 'pointer'
-                                        : 'not-allowed',
-                                    opacity: canToggle ? 1 : 0.5,
-                                  }}
-                                  title={tooltipText}
-                                >
-                                  {boss.killed
-                                    ? '☑'
-                                    : boss.encountered
-                                      ? '☐'
-                                      : '⬜'}
-                                </span>
-                              )
-                            })()}
-                            <span className="name">
-                              {translateBossName(boss.name)}
-                              {boss.originalName?.startsWith('MANUAL_') && (
-                                <span
-                                  style={{
-                                    marginLeft: '6px',
-                                    fontSize: '11px',
-                                    opacity: 0.7,
-                                  }}
-                                  title={t('bossList.manuallyAdded')}
-                                >
-                                  🔧
-                                </span>
-                              )}
-                            </span>
-                          </div>
+                      <div className="zone-items">
+                        {zone.visibleBosses.map((boss) => (
+                          <BossRow
+                            key={`${zone.zoneName}-${boss.originalName ?? boss.name}`}
+                            boss={boss}
+                            zoneName={zone.zoneName}
+                            allowManualEdit={allowManualEdit}
+                            onToggleBoss={onToggleBoss}
+                            translateBossName={translateBossName}
+                            t={t}
+                          />
+                        ))}
+                        {zone.visiblePictos.map((picto) => (
+                          <PictoRow key={`${zone.zoneName}-${picto.id}`} picto={picto} t={t} />
                         ))}
                       </div>
                     )}

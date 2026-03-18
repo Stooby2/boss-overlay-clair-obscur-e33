@@ -36,7 +36,13 @@
     "manuallyAdded": "Boss ajouté manuellement",
     "filterFound": "Found {{bosses}} | {{pictos}}",
     "filterRemaining": "Remaining {{bosses}} | {{pictos}}",
-    "pictosCollected": "{{found}} / {{total}} pictos collected"
+    "pictosCollected": "{{found}} / {{total}} pictos collected",
+    "nearestFlagLabel": "Nearest flag",
+    "howToGetLabel": "How to get",
+    "noNearestFlag": "No nearest flag recorded",
+    "noHowToGet": "No acquisition notes recorded",
+    "pictoFound": "FOUND",
+    "pictoMissing": "MISSING"
   },
   "bossForm": {
     "editTitle": "✏️ Modifier le boss",
