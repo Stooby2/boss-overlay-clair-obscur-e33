@@ -2,11 +2,11 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-import { ZONE_ALIASES } from '../src/components/checklistModel.ts'
 import {
   buildZoneLevelCoverageReport,
   IGN_ZONE_LEVEL_ALIASES,
 } from '../src/components/zoneLevels.ts'
+import { ZONE_ALIASES } from '../src/components/zoneNormalization.ts'
 import type { IgnZoneLevelsFile } from '../src/types/ZoneLevels.ts'
 
 async function readJson<T>(path: string): Promise<T> {

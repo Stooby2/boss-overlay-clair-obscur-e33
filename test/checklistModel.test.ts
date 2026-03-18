@@ -33,6 +33,12 @@ const bosses: Boss[] = [
     encountered: true,
     zone: 'mystery_woods',
   },
+  {
+    name: 'goblu',
+    killed: false,
+    encountered: false,
+    zone: 'the_continent',
+  },
 ]
 
 const pictos: Picto[] = [
@@ -176,8 +182,8 @@ const model = buildChecklistModel(bosses, pictos, monocoFeet, currentLocation)
 const summary = summarizeChecklist(model)
 assert.deepEqual(summary, {
   killedBosses: 1,
-  totalBosses: 2,
-  remainingBosses: 1,
+  totalBosses: 3,
+  remainingBosses: 2,
   foundPictos: 1,
   totalPictos: 3,
   remainingPictos: 2,
@@ -189,6 +195,17 @@ assert.deepEqual(summary, {
   currentZoneRemainingFeet: 1,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
+assert.deepEqual(
+  model.zoneGroups.map((zone) => zone.zoneName),
+  [
+    'spring_meadows',
+    'the_monolith',
+    'floating_cemetery',
+    'verso_drafts',
+    'mystery_woods',
+    'the_continent',
+  ],
+)
 
 const springMeadows = model.zoneGroups.find(
   (zone) => zone.zoneName === 'spring_meadows',
@@ -201,12 +218,16 @@ assert.equal(springMeadows.killed, 1)
 assert.equal(springMeadows.totalPictos, 1)
 assert.equal(springMeadows.totalFeet, 1)
 assert.equal(springMeadows.unmatchedEntries.length, 0)
+assert.equal(springMeadows.recommendedMinLevel, 0)
+assert.equal(springMeadows.recommendedMaxLevel, 0)
 
 const theMonolith = model.zoneGroups.find((zone) => zone.zoneName === 'the_monolith')
 assert.ok(theMonolith)
 assert.equal(theMonolith.monocoFeet.length, 1)
 assert.equal(theMonolith.totalFeet, 1)
 assert.equal(theMonolith.foundFeet, 0)
+assert.equal(theMonolith.recommendedMinLevel, 40)
+assert.equal(theMonolith.recommendedMaxLevel, 43)
 
 const floatingCemetery = model.zoneGroups.find(
   (zone) => zone.zoneName === 'floating_cemetery',
@@ -217,6 +238,13 @@ assert.equal(floatingCemetery.monocoFeet.length, 2)
 assert.equal(floatingCemetery.foundFeet, 1)
 assert.equal(floatingCemetery.totalFeet, 2)
 assert.equal(floatingCemetery.unmatchedEntries.length, 0)
+assert.equal(floatingCemetery.recommendedMinLevel, 60)
+assert.equal(floatingCemetery.recommendedMaxLevel, 70)
+
+const theContinent = model.zoneGroups.find((zone) => zone.zoneName === 'the_continent')
+assert.ok(theContinent)
+assert.equal(theContinent.recommendedMinLevel, undefined)
+assert.equal(theContinent.recommendedMaxLevel, undefined)
 
 const mysteryWoods = model.zoneGroups.find(
   (zone) => zone.zoneName === 'mystery_woods',

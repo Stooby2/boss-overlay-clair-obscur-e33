@@ -4,7 +4,7 @@ import type {
   ZoneLevelCoverageReport,
   ZoneLevelRange,
 } from '../types/ZoneLevels.ts'
-import { toZoneLookupKey, ZONE_ALIASES } from './checklistModel.ts'
+import { toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
 export const IGN_ZONE_LEVEL_ALIASES: Record<string, string[]> = {
   abbest_cave: ['Abbest Cave'],

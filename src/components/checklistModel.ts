@@ -2,6 +2,8 @@
 import type { CurrentLocation } from '../types/CurrentLocation'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
+import { zoneLevelsByZoneName } from './zoneLevels.ts'
+import { DEFAULT_ZONE_NAME, toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
 export type ZoneSource = 'boss' | 'picto' | 'foot' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
@@ -29,6 +31,8 @@ export interface ChecklistZoneGroup {
   totalPictos: number
   foundFeet: number
   totalFeet: number
+  recommendedMinLevel?: number
+  recommendedMaxLevel?: number
   unmatchedEntries: UnmatchedZoneName[]
 }
 
@@ -66,99 +70,6 @@ export interface ChecklistFilterOptions {
   translateBossName?: (bossName: string) => string
 }
 
-export const DEFAULT_ZONE_NAME = 'uncategorized'
-
-export const ZONE_ALIASES: Record<string, string[]> = {
-  abbest_cave: ['abbest_cave', 'Abbest Cave'],
-  crimson_forest: ['crimson_forest', 'Crimson Forest'],
-  crushing_cavern: ['crushing_cavern', 'Crushing Cavern'],
-  dark_shores_bloodied_beach: [
-    'dark_shores_bloodied_beach',
-    'Dark Shores - Bloodied Beach',
-  ],
-  ancient_sanctuary: ['ancient_sanctuary', 'Ancient Sanctuary'],
-  camp: ['camp', 'Camp'],
-  dark_gestral_arena: ['dark_gestral_arena', 'Dark Gestral Arena'],
-  endless_night_sanctuary: [
-    'endless_night_sanctuary',
-    'Endless Night Sanctuary',
-  ],
-  endless_tower: ['endless_tower', 'Endless Tower'],
-  esoteric_ruins_continent: [
-    'esoteric_ruins_continent',
-    'Esoteric Ruins/Continent',
-  ],
-  esquie_nest: ['esquie_nest', "Esquie's Nest"],
-  falling_leaves: [
-    'falling_leaves',
-    'Falling Leaves',
-    'Falling Leaves - Resinveil Groove',
-  ],
-  floating_cemetery: ['floating_cemetery', 'Floating Cemetery'],
-  flying_manor: [
-    'flying_manor',
-    'Flying Manor',
-    'Flying Manor - Central Plaza',
-  ],
-  flying_waters: ['flying_waters', 'Flying Waters'],
-  forgotten_battlefield: [
-    'forgotten_battlefield',
-    'Forgotten Battlefield',
-  ],
-  frozen_hearts: [
-    'frozen_hearts',
-    'Frozen Hearts',
-    'Frozen Hearts - Glacial Falls',
-  ],
-  gestral_village: ['gestral_village', 'Gestral Village'],
-  hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
-  isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
-  lumiere: ['lumiere', 'Lumiere', 'Lumière'],
-  lumiere_prologue: ['lumiere_prologue', 'Lumiere - Prologue'],
-  monoco_station: ['monoco_station', "Monoco's Station"],
-  old_lumiere: ['old_lumiere', 'Old Lumiere', 'Old Lumière'],
-  painting_workshop: ['painting_workshop', 'Painting Workshop'],
-  red_woods: ['red_woods', 'Red Woods'],
-  renoir_drafts: [
-    'renoir_drafts',
-    "Renoir's Drafts",
-    "Renoir's Drafts - Entrance",
-  ],
-  sacred_river: ['sacred_river', 'Sacred River'],
-  sinister_cave: ['sinister_cave', 'Sinister Cave'],
-  sirene: ['sirene', 'Sirene', 'Sirène'],
-  sirene_dress: ['sirene_dress', "Sirene's Dress", "Sirène's Dress"],
-  sky_island: ['sky_island', 'Sky Island', 'Sky Island - Entrance'],
-  spring_meadows: ['spring_meadows', 'Spring Meadows'],
-  stone_wave_cliffs: [
-    'stone_wave_cliffs',
-    'Stone Wave Cliffs',
-    'Stone Wave Cliffs - Flooded Buildings',
-  ],
-  stone_wave_cliffs_cave: [
-    'stone_wave_cliffs_cave',
-    'Stone Wave Cliffs Cave',
-  ],
-  sunless_cliffs: ['sunless_cliffs', 'Sunless Cliffs'],
-  the_chosen_path: ['the_chosen_path', 'The Chosen Path'],
-  the_continent: ['the_continent', 'The Continent'],
-  the_crows: ['the_crows', 'The Crows'],
-  the_monolith: [
-    'the_monolith',
-    'The Monolith',
-    'Inside the Monolith',
-    'Monolith Peak',
-  ],
-  the_reacher: ['the_reacher', 'The Reacher'],
-  verso_drafts: ['verso_drafts', "Verso's Draft", "Verso's Drafts"],
-  visages: ['visages', 'Visages'],
-  yellow_harvest: [
-    'yellow_harvest',
-    'Yellow Harvest',
-    "Yellow Harvest - Harvester's Hollow",
-  ],
-}
-
 const zoneAliasLookup = new Map<string, string>()
 const reportedUnmatchedZoneNames = new Set<string>()
 
@@ -166,17 +77,6 @@ for (const [zoneName, aliases] of Object.entries(ZONE_ALIASES)) {
   for (const alias of aliases) {
     zoneAliasLookup.set(toZoneLookupKey(alias), zoneName)
   }
-}
-
-export function toZoneLookupKey(value: string): string {
-  return value
-    .trim()
-    .normalize('NFKD')
-    .replace(/[\u2019\uFFFD]/g, "'")
-    .replace(/[_-]+/g, ' ')
-    .replace(/[^a-zA-Z0-9' ]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
 }
 
 function bossMatchesSearch(
@@ -300,6 +200,40 @@ function normalizeCurrentLocation(
   }
 }
 
+function compareChecklistZoneGroups(
+  left: ChecklistZoneGroup,
+  right: ChecklistZoneGroup,
+): number {
+  if (left.zoneName === 'the_continent') {
+    return right.zoneName === 'the_continent' ? 0 : 1
+  }
+  if (right.zoneName === 'the_continent') {
+    return -1
+  }
+
+  const leftHasLevelData = left.recommendedMinLevel !== undefined
+  const rightHasLevelData = right.recommendedMinLevel !== undefined
+
+  if (leftHasLevelData && rightHasLevelData) {
+    if (left.recommendedMinLevel !== right.recommendedMinLevel) {
+      return left.recommendedMinLevel! - right.recommendedMinLevel!
+    }
+    if (left.recommendedMaxLevel !== right.recommendedMaxLevel) {
+      return (left.recommendedMaxLevel ?? 0) - (right.recommendedMaxLevel ?? 0)
+    }
+    return left.zoneName.localeCompare(right.zoneName)
+  }
+
+  if (leftHasLevelData) {
+    return -1
+  }
+  if (rightHasLevelData) {
+    return 1
+  }
+
+  return left.zoneName.localeCompare(right.zoneName)
+}
+
 export function buildChecklistModel(
   bosses: Boss[],
   pictos: Picto[],
@@ -327,6 +261,8 @@ export function buildChecklistModel(
       totalPictos: 0,
       foundFeet: 0,
       totalFeet: 0,
+      recommendedMinLevel: zoneLevelsByZoneName[zoneName]?.recommendedMinLevel,
+      recommendedMaxLevel: zoneLevelsByZoneName[zoneName]?.recommendedMaxLevel,
       unmatchedEntries: [],
     }
     groups.set(zoneName, created)
@@ -410,7 +346,7 @@ export function buildChecklistModel(
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
   return {
-    zoneGroups: Array.from(groups.values()),
+    zoneGroups: Array.from(groups.values()).sort(compareChecklistZoneGroups),
     unmatchedZoneNames,
     currentZoneName: normalizedLocation.currentZoneName,
     monocoFeet,
