@@ -15,6 +15,9 @@ import {
   normalizeBackgroundOpacity,
 } from './utils/backgroundOpacity'
 
+const SETTINGS_ICON = '\u2699\uFE0F'
+const CLOSE_ICON = '\u2715'
+
 function App() {
   const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
@@ -193,8 +196,8 @@ function App() {
       <div className="title-bar">
         <span>Boss Overlay</span>
         <div className="controls">
-          <button onClick={() => setShowSettings(!showSettings)}>⚙️</button>
-          <button onClick={() => window.electronAPI?.closeApp()}>✕</button>
+          <button onClick={() => setShowSettings(!showSettings)}>{SETTINGS_ICON}</button>
+          <button onClick={() => window.electronAPI?.closeApp()}>{CLOSE_ICON}</button>
         </div>
       </div>
 

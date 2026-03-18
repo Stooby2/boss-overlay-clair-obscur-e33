@@ -41,6 +41,15 @@ interface MonocoFootRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+const CHECKBOX_KILLED = '\u2611'
+const CHECKBOX_ENCOUNTERED = '\u2610'
+const CHECKBOX_UNKNOWN = '\u2B1C'
+const MANUAL_MARKER = '\u{1F527}'
+const EXPAND_ALL_ICON = '\u{1F4C2}'
+const COLLAPSE_ALL_ICON = '\u{1F4C1}'
+const ZONE_EXPANDED_ICON = '\u25BC'
+const ZONE_COLLAPSED_ICON = '\u25B6'
+
 function BossRow({
   boss,
   allowManualEdit,
@@ -69,7 +78,7 @@ function BossRow({
         }}
         title={tooltipText}
       >
-        {boss.killed ? '[x]' : boss.encountered ? '[ ]' : '[-]'}
+        {boss.killed ? CHECKBOX_KILLED : boss.encountered ? CHECKBOX_ENCOUNTERED : CHECKBOX_UNKNOWN}
       </span>
       <span className="name">
         {translateBossName(boss.name)}
@@ -82,7 +91,7 @@ function BossRow({
             }}
             title={t('bossList.manuallyAdded')}
           >
-            [M]
+            {MANUAL_MARKER}
           </span>
         )}
       </span>
@@ -303,7 +312,7 @@ function BossChecklist(props: Props) {
                   : t('bossList.collapseAll')
               }
             >
-              {collapsedZones.size === filteredZoneGroups.length ? '+' : '-'}
+              {collapsedZones.size === filteredZoneGroups.length ? EXPAND_ALL_ICON : COLLAPSE_ALL_ICON}
             </button>
           </div>
 
@@ -325,7 +334,7 @@ function BossChecklist(props: Props) {
                       onClick={() => toggleZone(zone.zoneName)}
                     >
                       <span className="zone-toggle">
-                        {isCollapsed ? '>' : 'v'}
+                        {isCollapsed ? ZONE_COLLAPSED_ICON : ZONE_EXPANDED_ICON}
                       </span>
                       <span className="zone-name">
                         {translateZone(zone.zoneName)}
