@@ -7,6 +7,7 @@ import Settings from './components/Settings'
 import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
 import { CurrentLocation } from './types/CurrentLocation'
+import { JournalEntry } from './types/JournalEntry'
 import { MonocoFoot } from './types/MonocoFoot'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
@@ -24,6 +25,7 @@ function App() {
   const [bosses, setBosses] = useState<Boss[]>([])
   const [pictos, setPictos] = useState<Picto[]>([])
   const [monocoFeet, setMonocoFeet] = useState<MonocoFoot[]>([])
+  const [journals, setJournals] = useState<JournalEntry[]>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -74,6 +76,7 @@ function App() {
         setBosses(mergedBosses)
         setPictos(snapshot.pictos)
         setMonocoFeet(snapshot.monocoFeet)
+        setJournals(snapshot.journals)
         setLocation(snapshot.location)
       })
 
@@ -215,6 +218,7 @@ function App() {
           bosses={bosses}
           pictos={pictos}
           monocoFeet={monocoFeet}
+          journals={journals}
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}

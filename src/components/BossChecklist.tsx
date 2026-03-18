@@ -3,6 +3,7 @@
 import { useI18n } from '../i18n'
 import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { JournalEntry } from '../types/JournalEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
 import { formatZoneLevelLabel } from '../utils/zoneLevelLabel.ts'
@@ -18,6 +19,7 @@ interface Props {
   bosses: Boss[]
   pictos: Picto[]
   monocoFeet: MonocoFoot[]
+  journals: JournalEntry[]
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
