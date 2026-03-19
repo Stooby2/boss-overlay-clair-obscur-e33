@@ -19,6 +19,10 @@ import {
   type LocationSaveData,
 } from './locations.js'
 import {
+  extractLostGestrals,
+  type LostGestralCatalogFile,
+} from './lostGestrals.js'
+import {
   extractMonocoFeet,
   type MonocoFeetCatalogFile,
   type MonocoFeetMetadataEntry,
@@ -53,6 +57,7 @@ let pictoAcquireInfo: Map<string, PictoAcquireInfo> | null = null
 let locationCatalog: LocationCatalogFile | null = null
 let journalCatalog: JournalCatalogFile['Journals'] | null = null
 let journalLocations: JournalLocationFile['Journals'] | null = null
+let lostGestralCatalog: LostGestralCatalogFile['LostGestrals'] | null = null
 let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
   null
 let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
@@ -96,6 +101,27 @@ interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData
             }
           }
         }
+      }
+      QuestStatuses_0?: {
+        Map?: Array<{
+          key?: { Name?: string }
+          value?: {
+            Struct?: {
+              Struct?: {
+                ObjectivesStatus_8_EA1232C14DA1F6DDA84EBA9185000F56_0?: {
+                  Map?: Array<{
+                    key?: { Name?: string }
+                    value?: {
+                      Byte?: {
+                        Label?: string
+                      }
+                    }
+                  }>
+                }
+              }
+            }
+          }
+        }>
       }
       BattledEnemies_0?: {
         Map: Array<{
@@ -245,6 +271,27 @@ async function loadJournalData() {
   }
 }
 
+
+async function loadLostGestralData() {
+  if (lostGestralCatalog) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('lost_gestrals.json')
+    console.log('Loading lost gestral catalog from:', catalogPath)
+
+    const catalogContent = await readFile(catalogPath, 'utf-8')
+    const parsedCatalog = JSON.parse(catalogContent) as LostGestralCatalogFile
+    lostGestralCatalog = parsedCatalog.LostGestrals
+
+    console.log(`Loaded ${Object.keys(lostGestralCatalog).length} lost gestrals`)
+  } catch (error) {
+    console.error('Failed to load lost gestral data:', error)
+    lostGestralCatalog = {}
+  }
+}
+
 async function loadMonocoFeetData() {
   if (monocoFeetCatalog && monocoFeetMetadata) {
     return
@@ -338,6 +385,8 @@ function createFallbackSnapshot(): SaveSnapshot {
       journalCatalog && journalLocations
         ? extractJournals({}, journalCatalog, journalLocations)
         : [],
+    lostGestrals:
+      lostGestralCatalog ? extractLostGestrals({}, lostGestralCatalog) : [],
     location: null,
   }
 }
@@ -357,6 +406,8 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
       journalCatalog && journalLocations
         ? extractJournals(saveData, journalCatalog, journalLocations)
         : [],
+    lostGestrals:
+      lostGestralCatalog ? extractLostGestrals(saveData, lostGestralCatalog) : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -366,6 +417,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadLocationData()
   await loadPictoData()
   await loadJournalData()
+  await loadLostGestralData()
   await loadMonocoFeetData()
 
   try {
