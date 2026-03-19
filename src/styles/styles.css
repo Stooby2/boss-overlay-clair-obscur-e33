@@ -86,7 +86,7 @@ body {
 
 .stats-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px 12px;
   flex: 1;
 }
@@ -807,5 +807,76 @@ body {
 }
 
 .friendly-nevron-description .friendly-nevron-value {
+  color: var(--text-secondary);
+}
+
+.weapon-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid #e67e22;
+}
+
+.weapon-item.found {
+  border-left-color: #2ecc71;
+  opacity: var(--found-picto-opacity);
+}
+
+.weapon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weapon-name {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.weapon-status {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.weapon-status.found {
+  background: rgba(46, 204, 113, 0.2);
+  color: #7dffb0;
+}
+
+.weapon-status.missing {
+  background: rgba(230, 126, 34, 0.18);
+  color: #ffd1a0;
+}
+
+.weapon-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weapon-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.weapon-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.weapon-description .weapon-value {
   color: var(--text-secondary);
 }

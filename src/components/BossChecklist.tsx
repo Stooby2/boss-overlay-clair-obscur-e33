@@ -67,6 +67,11 @@ interface FriendlyNevronRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface WeaponRowProps {
+  weapon: WeaponEntry
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 const CHECKBOX_KILLED = '\u2611'
 const CHECKBOX_ENCOUNTERED = '\u2610'
 const CHECKBOX_UNKNOWN = '\u2B1C'
@@ -254,6 +259,26 @@ function FriendlyNevronRow({ friendlyNevron, t }: FriendlyNevronRowProps) {
     </div>
   )
 }
+
+function WeaponRow({ weapon, t }: WeaponRowProps) {
+  const summary = weapon.summary || t('bossList.noWeaponSummary')
+
+  return (
+    <div className={`weapon-item ${weapon.found ? 'found' : 'missing'}`}>
+      <div className="weapon-header">
+        <span className="weapon-name">{weapon.name}</span>
+        <span className={`weapon-status ${weapon.found ? 'found' : 'missing'}`}>
+          {weapon.found ? t('bossList.weaponFound') : t('bossList.weaponMissing')}
+        </span>
+      </div>
+      <div className="weapon-meta weapon-description">
+        <span className="weapon-label">{t('bossList.weaponSummaryLabel')}</span>
+        <span className="weapon-value">{summary}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist(props: Props) {
   const {
     bosses,
@@ -314,7 +339,8 @@ function BossChecklist(props: Props) {
           zone.visibleMonocoFeet.length > 0 ||
           zone.visibleJournals.length > 0 ||
           zone.visibleLostGestrals.length > 0 ||
-          zone.visibleFriendlyNevrons.length > 0,
+          zone.visibleFriendlyNevrons.length > 0 ||
+          zone.visibleWeapons.length > 0,
       ),
     [filteredZoneGroups],
   )
@@ -391,6 +417,12 @@ function BossChecklist(props: Props) {
                   peaceful: stats.peacefulFriendlyNevrons.toString(),
                   killed: stats.killedFriendlyNevrons.toString(),
                   total: stats.totalFriendlyNevrons.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.weaponsCollected', {
+                  found: stats.foundWeapons.toString(),
+                  total: stats.totalWeapons.toString(),
                 })}
               </span>
             </div>
@@ -544,6 +576,9 @@ function BossChecklist(props: Props) {
                             friendlyNevron={friendlyNevron}
                             t={t}
                           />
+                        ))}
+                        {zone.visibleWeapons.map((weapon) => (
+                          <WeaponRow key={`${zone.zoneName}-${weapon.id}`} weapon={weapon} t={t} />
                         ))}
                       </div>
                     )}
