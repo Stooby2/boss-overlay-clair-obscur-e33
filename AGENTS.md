@@ -32,6 +32,7 @@ Treat `npm run build` as the final verification step before finalizing the PR-si
 
 - If a test needs real save data, use fixtures from [`test_save`](./test_save).
 - Prefer the smallest fixture that covers the scenario.
-- Use [`test_save/EXPEDITION_0.sav`](./test_save/EXPEDITION_0.sav) or the timestamped snapshots under [`test_save/Backup`](./test_save/Backup) when parser or save-state behavior needs realistic inputs.
+- Prefer the checked-in JSON fixtures under [`test_save`](./test_save) for parser and save-state behavior.
+- Raw `.sav` files are not kept in the repo by default; regenerate JSON locally from a live save when a new binary fixture is needed.
 
 If a verification step cannot run, say exactly why and what remains unverified.
