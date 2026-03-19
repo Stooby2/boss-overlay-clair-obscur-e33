@@ -7,6 +7,7 @@ import type { FriendlyNevronEntry } from '../types/FriendlyNevronEntry'
 import type { JournalEntry } from '../types/JournalEntry'
 import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
+import type { MusicRecordEntry } from '../types/MusicRecordEntry'
 import type { Picto } from '../types/Picto'
 import type { WeaponEntry } from '../types/WeaponEntry'
 import { formatZoneLevelLabel } from '../utils/zoneLevelLabel.ts'
@@ -33,6 +34,7 @@ interface Props {
   lostGestrals: LostGestralEntry[]
   friendlyNevrons: FriendlyNevronEntry[]
   weapons: WeaponEntry[]
+  musicRecords: MusicRecordEntry[]
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
@@ -303,6 +305,7 @@ function BossChecklist(props: Props) {
     onToggleFeatureVisibility,
     onToggleBoss,
     allowManualEdit = false,
+    musicRecords,
   } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
@@ -377,7 +380,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 && friendlyNevrons.length === 0 && weapons.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 && friendlyNevrons.length === 0 && weapons.length === 0 && musicRecords.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>

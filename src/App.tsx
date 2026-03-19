@@ -13,6 +13,7 @@ import { CurrentLocation } from './types/CurrentLocation'
 import { JournalEntry } from './types/JournalEntry'
 import { LostGestralEntry } from './types/LostGestralEntry'
 import { MonocoFoot } from './types/MonocoFoot'
+import { MusicRecordEntry } from './types/MusicRecordEntry'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
 import { WeaponEntry } from './types/WeaponEntry'
@@ -33,6 +34,7 @@ function App() {
   const [lostGestrals, setLostGestrals] = useState<LostGestralEntry[]>([])
   const [friendlyNevrons, setFriendlyNevrons] = useState<SaveSnapshot['friendlyNevrons']>([])
   const [weapons, setWeapons] = useState<WeaponEntry[]>([])
+  const [musicRecords, setMusicRecords] = useState<MusicRecordEntry[]>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -89,6 +91,7 @@ function App() {
         setLostGestrals(snapshot.lostGestrals)
         setFriendlyNevrons(snapshot.friendlyNevrons)
         setWeapons(snapshot.weapons)
+        setMusicRecords(snapshot.musicRecords)
         setLocation(snapshot.location)
       })
 
@@ -202,6 +205,7 @@ function App() {
           lostGestrals={lostGestrals}
           friendlyNevrons={friendlyNevrons}
           weapons={weapons}
+          musicRecords={musicRecords}
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
