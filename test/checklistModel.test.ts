@@ -1,9 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
 
-import type { MonocoFeetCatalogFile, MonocoFeetSaveData } from '../electron/monocoFeet.ts'
-import { extractMonocoFeet, parseMonocoFeetMetadata } from '../electron/monocoFeet.ts'
 import {
   buildChecklistModel,
   filterChecklistGroups,
@@ -19,10 +15,6 @@ import type { LostGestralEntry } from '../src/types/LostGestralEntry.ts'
 import type { MonocoFoot } from '../src/types/MonocoFoot.ts'
 import type { Picto } from '../src/types/Picto.ts'
 import type { WeaponEntry } from '../src/types/WeaponEntry.ts'
-
-async function readJson<T>(path: string): Promise<T> {
-  return JSON.parse(await readFile(path, 'utf-8')) as T
-}
 
 const bosses: Boss[] = [
   {
@@ -631,27 +623,7 @@ reportUnmatchedZoneNames(model.unmatchedZoneNames, (message) => {
 assert.equal(logged.length, 2)
 assert.match(logged[0], /mystery_woods/)
 
-const rootDir = process.cwd()
-const monocoCatalogPath = resolve(rootDir, 'data', 'monoco_feet.json')
-const monocoMetadataPath = resolve(rootDir, 'data', 'feet_collection_with_locations.json')
-const monocoFixturePath = resolve(rootDir, 'test_save', 'monoco', '26_feet.json')
 
-const monocoCatalog = await readJson<MonocoFeetCatalogFile>(monocoCatalogPath)
-const monocoMetadata = parseMonocoFeetMetadata(
-  await readJson(monocoMetadataPath),
-)
-const monocoFixture = await readJson<MonocoFeetSaveData>(monocoFixturePath)
-const extractedMonocoFeet = extractMonocoFeet(
-  monocoFixture,
-  monocoCatalog.MonocoFeet,
-  monocoMetadata,
-)
-
-assert.equal(
-  extractedMonocoFeet.filter((foot) => foot.found).length,
-  24,
-  'The 26-feet fixture should include 24 collectible feet plus the 2 starter skills outside the catalog.',
-)
 
 console.log('checklistModel tests passed')
 

@@ -1,8 +1,4 @@
-import type {
-  ChecklistSummary,
-  ChecklistZoneGroup,
-  FilteredChecklistZoneGroup,
-} from './checklistModel'
+import type { ChecklistZoneGroup, FilteredChecklistZoneGroup } from './checklistModel'
 
 export type ChecklistFeatureKey =
   | 'bosses'
@@ -71,46 +67,6 @@ export function zoneHasVisibleContent(zone: FilteredChecklistZoneGroup): boolean
     zone.visibleFriendlyNevrons.length > 0 ||
     zone.visibleWeapons.length > 0
   )
-}
-
-export function buildFilterCountParts(
-  summary: ChecklistSummary,
-  visibility: ChecklistFeatureVisibility,
-  scope: 'found' | 'remaining' | 'current_zone',
-): string[] {
-  const parts: string[] = []
-
-  if (visibility.bosses) {
-    const value =
-      scope === 'found'
-        ? summary.killedBosses
-        : scope === 'remaining'
-          ? summary.remainingBosses
-          : summary.currentZoneRemainingBosses
-    parts.push(`B:${value}`)
-  }
-
-  if (visibility.pictos) {
-    const value =
-      scope === 'found'
-        ? summary.foundPictos
-        : scope === 'remaining'
-          ? summary.remainingPictos
-          : summary.currentZoneRemainingPictos
-    parts.push(`P:${value}`)
-  }
-
-  if (visibility.feet) {
-    const value =
-      scope === 'found'
-        ? summary.foundFeet
-        : scope === 'remaining'
-          ? summary.remainingFeet
-          : summary.currentZoneRemainingFeet
-    parts.push(`F:${value}`)
-  }
-
-  return parts
 }
 
 export function buildZoneStatsParts(

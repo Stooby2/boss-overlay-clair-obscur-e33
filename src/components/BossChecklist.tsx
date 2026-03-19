@@ -19,7 +19,6 @@ import {
 } from './checklistModel'
 import {
   applyChecklistFeatureVisibility,
-  buildFilterCountParts,
   buildZoneStatsParts,
   type ChecklistFeatureKey,
   type ChecklistFeatureVisibility,
@@ -350,21 +349,6 @@ function BossChecklist(props: Props) {
     [visibleZoneGroups],
   )
 
-  const foundFilterParts = useMemo(
-    () => buildFilterCountParts(stats, featureVisibility, 'found'),
-    [stats, featureVisibility],
-  )
-
-  const remainingFilterParts = useMemo(
-    () => buildFilterCountParts(stats, featureVisibility, 'remaining'),
-    [stats, featureVisibility],
-  )
-
-  const currentZoneFilterParts = useMemo(
-    () => buildFilterCountParts(stats, featureVisibility, 'current_zone'),
-    [stats, featureVisibility],
-  )
-
   const currentLocationLabel =
     currentLocation?.areaName ??
     currentLocation?.displayName ??
@@ -509,25 +493,19 @@ function BossChecklist(props: Props) {
               className={`filter-btn ${filterMode === 'found' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('found')}
             >
-              {foundFilterParts.length > 0
-                ? `${t('bossList.filterFoundLabel')} ${foundFilterParts.join(' ')}`
-                : t('bossList.filterFoundLabel')}
+              {t('bossList.filterFoundLabel')}
             </button>
             <button
               className={`filter-btn ${filterMode === 'remaining' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('remaining')}
             >
-              {remainingFilterParts.length > 0
-                ? `${t('bossList.filterRemainingLabel')} ${remainingFilterParts.join(' ')}`
-                : t('bossList.filterRemainingLabel')}
+              {t('bossList.filterRemainingLabel')}
             </button>
             <button
               className={`filter-btn ${filterMode === 'current_zone' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('current_zone')}
             >
-              {currentZoneFilterParts.length > 0
-                ? `${t('bossList.filterCurrentZoneLabel')} ${currentZoneFilterParts.join(' ')}`
-                : t('bossList.filterCurrentZoneLabel')}
+              {t('bossList.filterCurrentZoneLabel')}
             </button>
             <button
               className="filter-btn filter-btn-icon"

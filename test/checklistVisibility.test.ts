@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 import type { FilteredChecklistZoneGroup } from '../src/components/checklistModel.ts'
 import {
   applyChecklistFeatureVisibility,
-  buildFilterCountParts,
   buildZoneStatsParts,
   DEFAULT_CHECKLIST_FEATURE_VISIBILITY,
   toggleChecklistFeatureVisibility,
@@ -77,53 +76,6 @@ const emptyGroups = applyChecklistFeatureVisibility([sampleZone], {
   weapons: false,
 })
 assert.equal(zoneHasVisibleContent(emptyGroups[0]), false)
-
-assert.deepEqual(
-  buildFilterCountParts(
-    {
-      killedBosses: 4,
-      totalBosses: 10,
-      remainingBosses: 6,
-      foundPictos: 11,
-      totalPictos: 20,
-      remainingPictos: 9,
-      foundFeet: 2,
-      totalFeet: 8,
-      remainingFeet: 6,
-      foundJournals: 1,
-      totalJournals: 3,
-      remainingJournals: 2,
-      foundLostGestrals: 5,
-      totalLostGestrals: 9,
-      remainingLostGestrals: 4,
-      peacefulFriendlyNevrons: 2,
-      killedFriendlyNevrons: 1,
-      totalFriendlyNevrons: 10,
-      remainingFriendlyNevrons: 7,
-      foundWeapons: 4,
-      totalWeapons: 12,
-      remainingWeapons: 8,
-      currentZoneRemainingBosses: 1,
-      currentZoneRemainingPictos: 2,
-      currentZoneRemainingFeet: 3,
-      currentZoneRemainingJournals: 0,
-      currentZoneRemainingLostGestrals: 0,
-      currentZoneRemainingFriendlyNevrons: 0,
-      currentZoneRemainingWeapons: 0,
-    },
-    {
-      bosses: false,
-      pictos: true,
-      feet: false,
-      journals: true,
-      lostGestrals: true,
-      friendlyNevrons: true,
-      weapons: true,
-    },
-    'remaining',
-  ),
-  ['P:9'],
-)
 
 assert.deepEqual(
   buildZoneStatsParts(sampleZone, {
