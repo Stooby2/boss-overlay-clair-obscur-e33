@@ -53,6 +53,11 @@ interface JournalRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface LostGestralRowProps {
+  lostGestral: LostGestralEntry
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 const CHECKBOX_KILLED = '\u2611'
 const CHECKBOX_ENCOUNTERED = '\u2610'
 const CHECKBOX_UNKNOWN = '\u2B1C'
@@ -184,6 +189,31 @@ function JournalRow({ journal, t }: JournalRowProps) {
   )
 }
 
+function LostGestralRow({ lostGestral, t }: LostGestralRowProps) {
+  const summary = lostGestral.summary || t('bossList.noLostGestralSummary')
+
+  return (
+    <div className={`lost-gestral-item ${lostGestral.found ? 'found' : 'missing'}`}>
+      <div className="lost-gestral-header">
+        <span className="lost-gestral-name">{lostGestral.name}</span>
+        <span
+          className={`lost-gestral-status ${lostGestral.found ? 'found' : 'missing'}`}
+        >
+          {
+            lostGestral.found
+              ? t('bossList.lostGestralFound')
+              : t('bossList.lostGestralMissing')
+          }
+        </span>
+      </div>
+      <div className="lost-gestral-meta lost-gestral-description">
+        <span className="lost-gestral-label">{t('bossList.lostGestralLocationLabel')}</span>
+        <span className="lost-gestral-value">{summary}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist(props: Props) {
   const {
     bosses,
@@ -238,7 +268,8 @@ function BossChecklist(props: Props) {
           zone.visibleBosses.length > 0 ||
           zone.visiblePictos.length > 0 ||
           zone.visibleMonocoFeet.length > 0 ||
-          zone.visibleJournals.length > 0,
+          zone.visibleJournals.length > 0 ||
+          zone.visibleLostGestrals.length > 0,
       ),
     [filteredZoneGroups],
   )
@@ -271,7 +302,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -302,6 +333,12 @@ function BossChecklist(props: Props) {
                 {t('bossList.journalsCollected', {
                   found: stats.foundJournals.toString(),
                   total: stats.totalJournals.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.lostGestralsCollected', {
+                  found: stats.foundLostGestrals.toString(),
+                  total: stats.totalLostGestrals.toString(),
                 })}
               </span>
             </div>
@@ -408,7 +445,7 @@ function BossChecklist(props: Props) {
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
                       )}
                       <span className="zone-stats">
-                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet} | J {zone.foundJournals}/{zone.totalJournals}
+                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet} | J {zone.foundJournals}/{zone.totalJournals} | G {zone.foundLostGestrals}/{zone.totalLostGestrals}
                       </span>
                     </div>
                     {!isCollapsed && (
@@ -441,6 +478,13 @@ function BossChecklist(props: Props) {
                         ))}
                         {zone.visibleJournals.map((journal) => (
                           <JournalRow key={`${zone.zoneName}-${journal.id}`} journal={journal} t={t} />
+                        ))}
+                        {zone.visibleLostGestrals.map((lostGestral) => (
+                          <LostGestralRow
+                            key={`${zone.zoneName}-${lostGestral.id}`}
+                            lostGestral={lostGestral}
+                            t={t}
+                          />
                         ))}
                       </div>
                     )}

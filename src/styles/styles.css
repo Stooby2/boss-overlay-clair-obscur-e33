@@ -85,9 +85,10 @@ body {
 }
 
 .stats-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  flex: 1;
 }
 
 .stat-item {
@@ -268,6 +269,7 @@ body {
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
+  text-align: right;
 }
 
 .zone-items {
@@ -649,5 +651,76 @@ body {
 }
 
 .journal-description .journal-value {
+  color: var(--text-secondary);
+}
+
+.lost-gestral-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid #1abc9c;
+}
+
+.lost-gestral-item.found {
+  border-left-color: #2ecc71;
+  opacity: var(--found-picto-opacity);
+}
+
+.lost-gestral-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lost-gestral-name {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lost-gestral-status {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.lost-gestral-status.found {
+  background: rgba(46, 204, 113, 0.2);
+  color: #7dffb0;
+}
+
+.lost-gestral-status.missing {
+  background: rgba(26, 188, 156, 0.18);
+  color: #9ef3e1;
+}
+
+.lost-gestral-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lost-gestral-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lost-gestral-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lost-gestral-description .lost-gestral-value {
   color: var(--text-secondary);
 }
