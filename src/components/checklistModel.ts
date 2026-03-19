@@ -4,12 +4,13 @@ import type { FriendlyNevronEntry } from '../types/FriendlyNevronEntry'
 import type { JournalEntry } from '../types/JournalEntry'
 import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
+import type { MusicRecordEntry } from '../types/MusicRecordEntry'
 import type { Picto } from '../types/Picto'
 import type { WeaponEntry } from '../types/WeaponEntry'
 import { zoneLevelsByZoneName } from './zoneLevels.ts'
 import { DEFAULT_ZONE_NAME, toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
-export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'lost_gestral' | 'friendly_nevron' | 'weapon' | 'location'
+export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'lost_gestral' | 'friendly_nevron' | 'weapon' | 'music' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
@@ -32,6 +33,7 @@ export interface ChecklistZoneGroup {
   lostGestrals: LostGestralEntry[]
   friendlyNevrons: FriendlyNevronEntry[]
   weapons: WeaponEntry[]
+  musicRecords: MusicRecordEntry[]
   killed: number
   encountered: number
   totalBosses: number
@@ -48,6 +50,8 @@ export interface ChecklistZoneGroup {
   totalFriendlyNevrons: number
   foundWeapons: number
   totalWeapons: number
+  foundMusicRecords: number
+  totalMusicRecords: number
   recommendedMinLevel?: number
   recommendedMaxLevel?: number
   unmatchedEntries: UnmatchedZoneName[]
@@ -61,6 +65,7 @@ export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
   visibleLostGestrals: LostGestralEntry[]
   visibleFriendlyNevrons: FriendlyNevronEntry[]
   visibleWeapons: WeaponEntry[]
+  visibleMusicRecords: MusicRecordEntry[]
 }
 
 export interface ChecklistModel {
@@ -72,6 +77,7 @@ export interface ChecklistModel {
   lostGestrals: LostGestralEntry[]
   friendlyNevrons: FriendlyNevronEntry[]
   weapons: WeaponEntry[]
+  musicRecords: MusicRecordEntry[]
 }
 
 export interface ChecklistSummary {
@@ -97,6 +103,9 @@ export interface ChecklistSummary {
   foundWeapons: number
   totalWeapons: number
   remainingWeapons: number
+  foundMusicRecords: number
+  totalMusicRecords: number
+  remainingMusicRecords: number
   currentZoneRemainingBosses: number
   currentZoneRemainingPictos: number
   currentZoneRemainingFeet: number
@@ -104,6 +113,7 @@ export interface ChecklistSummary {
   currentZoneRemainingLostGestrals: number
   currentZoneRemainingFriendlyNevrons: number
   currentZoneRemainingWeapons: number
+  currentZoneRemainingMusicRecords: number
 }
 
 export interface ChecklistFilterOptions {
@@ -176,6 +186,12 @@ function friendlyNevronMatchesSearch(
 
 function weaponMatchesSearch(weapon: WeaponEntry, term: string): boolean {
   return [weapon.name, weapon.owner, weapon.sourceZoneName, weapon.summary].some(
+    (value) => value.toLowerCase().includes(term),
+  )
+}
+
+function musicRecordMatchesSearch(musicRecord: MusicRecordEntry, term: string): boolean {
+  return [musicRecord.name, musicRecord.sourceZoneName, musicRecord.summary].some(
     (value) => value.toLowerCase().includes(term),
   )
 }
@@ -280,6 +296,21 @@ function weaponMatchesFilter(
 
   return true
 }
+
+function musicRecordMatchesFilter(
+  musicRecord: MusicRecordEntry,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return musicRecord.found
+  }
+
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
+    return !musicRecord.found
+  }
+
+  return true
+}
 export function normalizeZoneName(
   rawName: string | undefined,
   _source: ZoneSource,
@@ -374,6 +405,7 @@ export function buildChecklistModel(
   lostGestrals: LostGestralEntry[],
   friendlyNevrons: FriendlyNevronEntry[],
   weapons: WeaponEntry[],
+  musicRecords: MusicRecordEntry[],
   currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
@@ -394,6 +426,7 @@ export function buildChecklistModel(
       lostGestrals: [],
       friendlyNevrons: [],
       weapons: [],
+      musicRecords: [],
       killed: 0,
       encountered: 0,
       totalBosses: 0,
@@ -410,6 +443,8 @@ export function buildChecklistModel(
       totalFriendlyNevrons: 0,
       foundWeapons: 0,
       totalWeapons: 0,
+      foundMusicRecords: 0,
+      totalMusicRecords: 0,
       recommendedMinLevel: zoneLevelsByZoneName[zoneName]?.recommendedMinLevel,
       recommendedMaxLevel: zoneLevelsByZoneName[zoneName]?.recommendedMaxLevel,
       unmatchedEntries: [],
@@ -577,6 +612,26 @@ export function buildChecklistModel(
       group.unmatchedEntries.push(unmatched)
     }
   }
+
+  for (const musicRecord of musicRecords) {
+    const normalized = normalizeZoneName(musicRecord.zoneName, 'music')
+    const group = getOrCreateGroup(normalized.zoneName)
+    group.musicRecords.push(musicRecord)
+    group.totalMusicRecords += 1
+    if (musicRecord.found) {
+      group.foundMusicRecords += 1
+    }
+
+    if (!normalized.matched && musicRecord.zoneName.trim().length > 0) {
+      const unmatched = {
+        source: 'music' as const,
+        rawName: musicRecord.zoneName.trim(),
+        fallbackZoneName: normalized.zoneName,
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
+    }
+  }
   const normalizedLocation = normalizeCurrentLocation(currentLocation)
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
@@ -589,6 +644,7 @@ export function buildChecklistModel(
     lostGestrals,
     friendlyNevrons,
     weapons,
+    musicRecords,
   }
 }
 
@@ -617,6 +673,8 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
   const killedFriendlyNevrons = model.friendlyNevrons.filter((friendlyNevron) => friendlyNevron.isKilled).length
   const totalWeapons = model.weapons.length
   const foundWeapons = model.weapons.filter((weapon) => weapon.found).length
+  const totalMusicRecords = model.musicRecords.length
+  const foundMusicRecords = model.musicRecords.filter((musicRecord) => musicRecord.found).length
   const currentZone = model.currentZoneName
     ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
     : null
@@ -644,6 +702,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundWeapons,
     totalWeapons,
     remainingWeapons: totalWeapons - foundWeapons,
+    foundMusicRecords,
+    totalMusicRecords,
+    remainingMusicRecords: totalMusicRecords - foundMusicRecords,
     currentZoneRemainingBosses: currentZone
       ? currentZone.totalBosses - currentZone.killed
       : 0,
@@ -664,6 +725,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
       : 0,
     currentZoneRemainingWeapons: currentZone
       ? currentZone.totalWeapons - currentZone.foundWeapons
+      : 0,
+    currentZoneRemainingMusicRecords: currentZone
+      ? currentZone.totalMusicRecords - currentZone.foundMusicRecords
       : 0,
   }
 }
@@ -730,6 +794,12 @@ export function filterChecklistGroups(
           (searchTerm.length === 0 || weaponMatchesSearch(weapon, searchTerm)),
       )
 
+      const visibleMusicRecords = zone.musicRecords.filter(
+        (musicRecord) =>
+          musicRecordMatchesFilter(musicRecord, options.filterMode) &&
+          (searchTerm.length === 0 || musicRecordMatchesSearch(musicRecord, searchTerm)),
+      )
+
       return {
         ...zone,
         visibleBosses,
@@ -739,6 +809,7 @@ export function filterChecklistGroups(
         visibleLostGestrals,
         visibleFriendlyNevrons,
         visibleWeapons,
+        visibleMusicRecords,
       }
     })
     .filter(
@@ -749,7 +820,8 @@ export function filterChecklistGroups(
         zone.visibleJournals.length > 0 ||
         zone.visibleLostGestrals.length > 0 ||
         zone.visibleFriendlyNevrons.length > 0 ||
-        zone.visibleWeapons.length > 0,
+        zone.visibleWeapons.length > 0 ||
+        zone.visibleMusicRecords.length > 0,
     )
 }
 

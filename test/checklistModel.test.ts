@@ -258,6 +258,27 @@ const weapons: WeaponEntry[] = [
   },
 ]
 
+const musicRecords: MusicRecordEntry[] = [
+  {
+    id: 'MusicRecord_1',
+    name: 'Alicia',
+    found: true,
+    zoneName: 'the_manor',
+    sourceZoneName: 'The Manor',
+    locationUrl: '',
+    summary: 'Enter The Manor from Falling Leaves.',
+  },
+  {
+    id: 'MusicRecord_2',
+    name: 'Lumière',
+    found: false,
+    zoneName: 'floating_cemetery',
+    sourceZoneName: 'Floating Cemetery',
+    locationUrl: '',
+    summary: 'Near the record player challenge door.',
+  },
+]
+
 const currentLocation: CurrentLocation = {
   levelKey: 'Level_Sirene_Main_V2',
   spawnTag: 'Level.SpawnPoint.Generic.Dynamic',
@@ -315,6 +336,7 @@ const model = buildChecklistModel(
   lostGestrals,
   friendlyNevrons,
   weapons,
+  musicRecords,
   currentLocation,
 )
 const summary = summarizeChecklist(model)
@@ -341,6 +363,9 @@ assert.deepEqual(summary, {
   foundWeapons: 1,
   totalWeapons: 3,
   remainingWeapons: 2,
+  foundMusicRecords: 1,
+  totalMusicRecords: 2,
+  remainingMusicRecords: 1,
   currentZoneRemainingBosses: 0,
   currentZoneRemainingPictos: 1,
   currentZoneRemainingFeet: 1,
@@ -348,6 +373,7 @@ assert.deepEqual(summary, {
   currentZoneRemainingLostGestrals: 0,
   currentZoneRemainingFriendlyNevrons: 1,
   currentZoneRemainingWeapons: 1,
+  currentZoneRemainingMusicRecords: 1,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
 assert.deepEqual(
@@ -358,6 +384,7 @@ assert.deepEqual(
     'floating_cemetery',
     'verso_drafts',
     'mystery_woods',
+    'the_manor',
     'the_small_bourgeon',
     'the_continent',
   ],
@@ -460,7 +487,7 @@ const foundGroups = filterChecklistGroups(model, {
   searchTerm: '',
   translateBossName: (value) => value,
 })
-assert.equal(foundGroups.length, 3)
+assert.equal(foundGroups.length, 4)
 assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visibleBosses.length, 0), 1)
 assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visiblePictos.length, 0), 1)
 assert.equal(
@@ -480,6 +507,7 @@ assert.equal(
   2,
 )
 assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visibleWeapons.length, 0), 1)
+assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visibleMusicRecords.length, 0), 1)
 
 const remainingGroups = filterChecklistGroups(model, {
   filterMode: 'remaining',
@@ -577,6 +605,7 @@ const unresolvedCurrentZone = buildChecklistModel(
   lostGestrals,
   friendlyNevrons,
   weapons,
+  musicRecords,
   {
     levelKey: 'Level_Unknown_Debug',
     spawnTag: 'Level.SpawnPoint.Unknown.Debug',

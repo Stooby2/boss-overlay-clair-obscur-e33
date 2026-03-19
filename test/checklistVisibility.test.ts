@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+﻿import assert from 'node:assert/strict'
 
 import type { FilteredChecklistZoneGroup } from '../src/components/checklistModel.ts'
 import {
@@ -18,6 +18,7 @@ const sampleZone = {
   lostGestrals: [],
   friendlyNevrons: [],
   weapons: [],
+  musicRecords: [],
   killed: 1,
   encountered: 1,
   totalBosses: 2,
@@ -34,6 +35,8 @@ const sampleZone = {
   totalFriendlyNevrons: 1,
   foundWeapons: 1,
   totalWeapons: 3,
+  foundMusicRecords: 0,
+  totalMusicRecords: 1,
   unmatchedEntries: [],
   visibleBosses: [{ name: 'goblu' }],
   visiblePictos: [{ id: 'Dodger' }],
@@ -42,6 +45,7 @@ const sampleZone = {
   visibleLostGestrals: [{ id: 'FindLostGestral_1' }],
   visibleFriendlyNevrons: [{ id: 'Nevron_JarNeedLight' }],
   visibleWeapons: [{ id: 'PracticeBlade' }],
+  visibleMusicRecords: [{ id: 'MusicRecord_2' }],
 } as unknown as FilteredChecklistZoneGroup
 
 const visibility = toggleChecklistFeatureVisibility(
@@ -64,6 +68,7 @@ assert.equal(hiddenGroups[0].visibleJournals.length, 0)
 assert.equal(hiddenGroups[0].visibleLostGestrals.length, 0)
 assert.equal(hiddenGroups[0].visibleMonocoFeet.length, 1)
 assert.equal(hiddenGroups[0].visibleWeapons.length, 1)
+assert.equal(hiddenGroups[0].visibleMusicRecords.length, 1)
 assert.equal(zoneHasVisibleContent(hiddenGroups[0]), true)
 
 const emptyGroups = applyChecklistFeatureVisibility([sampleZone], {
@@ -74,6 +79,7 @@ const emptyGroups = applyChecklistFeatureVisibility([sampleZone], {
   lostGestrals: false,
   friendlyNevrons: false,
   weapons: false,
+  musicRecords: false,
 })
 assert.equal(zoneHasVisibleContent(emptyGroups[0]), false)
 
@@ -86,8 +92,9 @@ assert.deepEqual(
     lostGestrals: true,
     friendlyNevrons: true,
     weapons: true,
+    musicRecords: true,
   }).map((part) => part.label),
-  ['1\ud83c\udfc6', '2\u2728', '1\ud83e\uddb6', '3\ud83d\udcd6', '1\ud83d\udc76', '1\ud83d\udc7e', '2\ud83d\udde1\ufe0f'],
+  ['1\ud83c\udfc6', '2\u2728', '1\ud83e\uddb6', '3\ud83d\udcd6', '1\ud83d\udc76', '1\ud83d\udc7e', '2\ud83d\udde1\ufe0f', '1\ud83d\udcbf'],
 )
 
 assert.deepEqual(
@@ -99,6 +106,7 @@ assert.deepEqual(
     lostGestrals: false,
     friendlyNevrons: false,
     weapons: false,
+    musicRecords: false,
   }).map((part) => part.label),
   ['2\u2728'],
 )

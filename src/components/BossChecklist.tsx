@@ -298,6 +298,7 @@ function BossChecklist(props: Props) {
     lostGestrals,
     friendlyNevrons,
     weapons,
+    musicRecords,
     currentLocation,
     filterMode,
     onFilterModeChange,
@@ -305,7 +306,6 @@ function BossChecklist(props: Props) {
     onToggleFeatureVisibility,
     onToggleBoss,
     allowManualEdit = false,
-    musicRecords,
   } = props
   const { t, translateZone, translateBossName } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
@@ -321,9 +321,10 @@ function BossChecklist(props: Props) {
         lostGestrals,
         friendlyNevrons,
         weapons,
+        musicRecords,
         currentLocation,
       ),
-    [bosses, pictos, monocoFeet, journals, lostGestrals, friendlyNevrons, weapons, currentLocation],
+    [bosses, pictos, monocoFeet, journals, lostGestrals, friendlyNevrons, weapons, musicRecords, currentLocation],
   )
 
   useEffect(() => {

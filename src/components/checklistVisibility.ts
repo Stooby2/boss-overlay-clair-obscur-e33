@@ -8,6 +8,7 @@ export type ChecklistFeatureKey =
   | 'lostGestrals'
   | 'friendlyNevrons'
   | 'weapons'
+  | 'musicRecords'
 
 export interface ChecklistFeatureVisibility {
   bosses: boolean
@@ -17,6 +18,7 @@ export interface ChecklistFeatureVisibility {
   lostGestrals: boolean
   friendlyNevrons: boolean
   weapons: boolean
+  musicRecords: boolean
 }
 
 export const DEFAULT_CHECKLIST_FEATURE_VISIBILITY: ChecklistFeatureVisibility = {
@@ -27,6 +29,7 @@ export const DEFAULT_CHECKLIST_FEATURE_VISIBILITY: ChecklistFeatureVisibility = 
   lostGestrals: true,
   friendlyNevrons: true,
   weapons: true,
+  musicRecords: true,
 }
 
 export function toggleChecklistFeatureVisibility(
@@ -54,6 +57,7 @@ export function applyChecklistFeatureVisibility(
       ? zone.visibleFriendlyNevrons
       : [],
     visibleWeapons: visibility.weapons ? zone.visibleWeapons : [],
+    visibleMusicRecords: visibility.musicRecords ? zone.visibleMusicRecords : [],
   }))
 }
 
@@ -65,7 +69,8 @@ export function zoneHasVisibleContent(zone: FilteredChecklistZoneGroup): boolean
     zone.visibleJournals.length > 0 ||
     zone.visibleLostGestrals.length > 0 ||
     zone.visibleFriendlyNevrons.length > 0 ||
-    zone.visibleWeapons.length > 0
+    zone.visibleWeapons.length > 0 ||
+    zone.visibleMusicRecords.length > 0
   )
 }
 
@@ -83,6 +88,7 @@ const ZONE_SUMMARY_ICONS: Record<ChecklistFeatureKey, string> = {
   lostGestrals: '\u{1F476}',
   friendlyNevrons: '\u{1F47E}',
   weapons: '\u{1F5E1}\uFE0F',
+  musicRecords: '\u{1F4BF}',
 }
 
 export function buildZoneRemainingSummaryParts(
@@ -113,6 +119,7 @@ export function buildZoneRemainingSummaryParts(
     zone.totalFriendlyNevrons - zone.peacefulFriendlyNevrons - zone.killedFriendlyNevrons,
   )
   pushPart('weapons', zone.totalWeapons - zone.foundWeapons)
+  pushPart('musicRecords', zone.totalMusicRecords - zone.foundMusicRecords)
 
   return parts
 }
