@@ -30,7 +30,8 @@
     "test:zone-levels": "node --experimental-strip-types test/zoneLevels.test.ts",
     "test:zone-level-label": "node --experimental-strip-types test/zoneLevelLabel.test.ts",
     "test:journal-locations": "node --experimental-strip-types test/journalLocations.test.ts",
-    "test:journal-parser": "node --experimental-strip-types test/journalParser.test.ts"
+    "test:journal-parser": "node --experimental-strip-types test/journalParser.test.ts",
+    "test:lost-gestrals-catalog": "node --experimental-strip-types test/lostGestralsCatalog.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
