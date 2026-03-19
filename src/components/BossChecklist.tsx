@@ -82,6 +82,11 @@ interface WeaponRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface MusicRecordRowProps {
+  musicRecord: MusicRecordEntry
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 const CHECKBOX_KILLED = '\u2611'
 const CHECKBOX_ENCOUNTERED = '\u2610'
 const CHECKBOX_UNKNOWN = '\u2B1C'
@@ -289,6 +294,25 @@ function WeaponRow({ weapon, t }: WeaponRowProps) {
   )
 }
 
+function MusicRecordRow({ musicRecord, t }: MusicRecordRowProps) {
+  const summary = musicRecord.summary || t('bossList.noMusicRecordSummary')
+
+  return (
+    <div className={`music-record-item ${musicRecord.found ? 'found' : 'missing'}`}>
+      <div className="music-record-header">
+        <span className="music-record-name">{musicRecord.name}</span>
+        <span className={`music-record-status ${musicRecord.found ? 'found' : 'missing'}`}>
+          {musicRecord.found ? t('bossList.musicRecordFound') : t('bossList.musicRecordMissing')}
+        </span>
+      </div>
+      <div className="music-record-meta music-record-description">
+        <span className="music-record-label">{t('bossList.musicRecordSummaryLabel')}</span>
+        <span className="music-record-value">{summary}</span>
+      </div>
+    </div>
+  )
+}
+
 function BossChecklist(props: Props) {
   const {
     bosses,
@@ -468,6 +492,17 @@ function BossChecklist(props: Props) {
                   total: stats.totalWeapons.toString(),
                 })}
               </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.musicRecords ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('musicRecords')}
+                aria-pressed={featureVisibility.musicRecords}
+              >
+                {t('bossList.musicRecordsCollected', {
+                  found: stats.foundMusicRecords.toString(),
+                  total: stats.totalMusicRecords.toString(),
+                })}
+              </button>
             </div>
           </div>
 
@@ -616,6 +651,13 @@ function BossChecklist(props: Props) {
                         {zone.visibleWeapons.map((weapon) => (
                           <WeaponRow key={`${zone.zoneName}-${weapon.id}`} weapon={weapon} t={t} />
                         ))}
+                        {zone.visibleMusicRecords.map((musicRecord) => (
+                          <MusicRecordRow
+                            key={`${zone.zoneName}-${musicRecord.id}`}
+                            musicRecord={musicRecord}
+                            t={t}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -630,4 +672,3 @@ function BossChecklist(props: Props) {
 }
 
 export default BossChecklist
-

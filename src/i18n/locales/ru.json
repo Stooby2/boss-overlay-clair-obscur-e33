@@ -26,13 +26,13 @@
     "configurePathInSettings": "Настройте путь к файлу в настройках.",
     "bossesKilled": "🏆 Убито {{killed}} из {{total}} боссов.",
     "addBossManually": "Добавить босса вручную",
-    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, friendly nevrons, or weapons...",
+    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, friendly nevrons, weapons, or music records...",
     "filterAll": "All",
     "filterKilled": "Убито ({{count}})",
     "filterAlive": "Оставшиеся ({{count}})",
     "expandAll": "Развернуть все локации",
     "collapseAll": "Свернуть все локации",
-    "noResults": "No bosses, pictos, feet, journals, lost gestrals, friendly nevrons, or weapons found",
+    "noResults": "No bosses, pictos, feet, journals, lost gestrals, friendly nevrons, weapons, or music records found",
     "autoDetected": "Автоматическое определение пройденных боссов (редактировать нельзя)",
     "markAsAlive": "Пометить как живого",
     "markAsKilled": "Пометить как убитого",
@@ -61,8 +61,8 @@
     "footLocationsLabel": "Locations",
     "noFootMonster": "No monster recorded",
     "noFootLocations": "No locations recorded",
-    "journalsCollected": "\ud83d\udcd6 {{found}} / {{total}} journals found",
-    "lostGestralsCollected": "\ud83d\udc76 {{found}} / {{total}} lost gestrals found",
+    "journalsCollected": "📖 {{found}} / {{total}} journals found",
+    "lostGestralsCollected": "👶 {{found}} / {{total}} lost gestrals found",
     "journalFound": "FOUND",
     "journalMissing": "MISSING",
     "journalSummaryLabel": "Summary",
@@ -71,17 +71,22 @@
     "lostGestralMissing": "MISSING",
     "lostGestralLocationLabel": "Location",
     "noLostGestralSummary": "No lost gestral notes recorded",
-    "friendlyNevronsCollected": "\ud83d\udc7e {{peaceful}}\u270c\ufe0f {{killed}}\ud83e\udea6 / {{total}}",
+    "friendlyNevronsCollected": "👾 {{peaceful}}✌️ {{killed}}🪦 / {{total}}",
     "friendlyNevronPeaceful": "PEACE",
     "friendlyNevronKilled": "KILLED",
     "friendlyNevronUnresolved": "UNRESOLVED",
     "friendlyNevronSummaryLabel": "Summary",
     "noFriendlyNevronSummary": "No Friendly Nevron notes recorded",
-    "weaponsCollected": "\ud83d\udde1\ufe0f {{found}} / {{total}} weapons found",
+    "weaponsCollected": "🗡️ {{found}} / {{total}} weapons found",
     "weaponFound": "FOUND",
     "weaponMissing": "MISSING",
     "weaponSummaryLabel": "Summary",
-    "noWeaponSummary": "No weapon notes recorded"
+    "noWeaponSummary": "No weapon notes recorded",
+    "musicRecordsCollected": "💿 {{found}} / {{total}} music records found",
+    "musicRecordFound": "FOUND",
+    "musicRecordMissing": "MISSING",
+    "musicRecordSummaryLabel": "Summary",
+    "noMusicRecordSummary": "No music record notes recorded"
   },
   "bossForm": {
     "editTitle": "✏️ Редактировать босса",
@@ -330,4 +335,3 @@
     "eveques": "Епископы"
   }
 }
-

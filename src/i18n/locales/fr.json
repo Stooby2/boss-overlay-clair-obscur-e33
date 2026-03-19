@@ -26,13 +26,13 @@
     "configurePathInSettings": "Configurez le chemin du fichier dans les paramètres",
     "bossesKilled": "🏆 {{killed}} / {{total}} boss vaincus",
     "addBossManually": "Ajouter un boss manuellement",
-    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, friendly nevrons, or weapons...",
+    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, friendly nevrons, weapons, or music records...",
     "filterAll": "All",
     "filterKilled": "Vaincus ({{count}})",
     "filterAlive": "Restants ({{count}})",
     "expandAll": "Développer toutes les zones",
     "collapseAll": "Réduire toutes les zones",
-    "noResults": "No bosses, pictos, feet, journals, lost gestrals, friendly nevrons, or weapons found",
+    "noResults": "No bosses, pictos, feet, journals, lost gestrals, friendly nevrons, weapons, or music records found",
     "autoDetected": "Boss détecté automatiquement (non modifiable)",
     "markAsAlive": "Marquer comme vivant",
     "markAsKilled": "Marquer comme vaincu",
@@ -61,8 +61,8 @@
     "footLocationsLabel": "Locations",
     "noFootMonster": "No monster recorded",
     "noFootLocations": "No locations recorded",
-    "journalsCollected": "\ud83d\udcd6 {{found}} / {{total}} journals found",
-    "lostGestralsCollected": "\ud83d\udc76 {{found}} / {{total}} lost gestrals found",
+    "journalsCollected": "📖 {{found}} / {{total}} journals found",
+    "lostGestralsCollected": "👶 {{found}} / {{total}} lost gestrals found",
     "journalFound": "FOUND",
     "journalMissing": "MISSING",
     "journalSummaryLabel": "Summary",
@@ -71,17 +71,22 @@
     "lostGestralMissing": "MISSING",
     "lostGestralLocationLabel": "Location",
     "noLostGestralSummary": "No lost gestral notes recorded",
-    "friendlyNevronsCollected": "\ud83d\udc7e {{peaceful}}\u270c\ufe0f {{killed}}\ud83e\udea6 / {{total}}",
+    "friendlyNevronsCollected": "👾 {{peaceful}}✌️ {{killed}}🪦 / {{total}}",
     "friendlyNevronPeaceful": "PEACE",
     "friendlyNevronKilled": "KILLED",
     "friendlyNevronUnresolved": "UNRESOLVED",
     "friendlyNevronSummaryLabel": "Summary",
     "noFriendlyNevronSummary": "No Friendly Nevron notes recorded",
-    "weaponsCollected": "\ud83d\udde1\ufe0f {{found}} / {{total}} weapons found",
+    "weaponsCollected": "🗡️ {{found}} / {{total}} weapons found",
     "weaponFound": "FOUND",
     "weaponMissing": "MISSING",
     "weaponSummaryLabel": "Summary",
-    "noWeaponSummary": "No weapon notes recorded"
+    "noWeaponSummary": "No weapon notes recorded",
+    "musicRecordsCollected": "💿 {{found}} / {{total}} music records found",
+    "musicRecordFound": "FOUND",
+    "musicRecordMissing": "MISSING",
+    "musicRecordSummaryLabel": "Summary",
+    "noMusicRecordSummary": "No music record notes recorded"
   },
   "bossForm": {
     "editTitle": "✏️ Modifier le boss",
@@ -330,4 +335,3 @@
     "eveques": "Évêques"
   }
 }
-
