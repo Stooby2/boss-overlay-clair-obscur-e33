@@ -724,3 +724,88 @@ body {
 .lost-gestral-description .lost-gestral-value {
   color: var(--text-secondary);
 }
+
+.friendly-nevron-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid #6fa8ff;
+}
+
+.friendly-nevron-item.peace {
+  border-left-color: #2ecc71;
+  opacity: var(--found-picto-opacity);
+}
+
+.friendly-nevron-item.killed {
+  border-left-color: #e74c3c;
+  opacity: var(--found-picto-opacity);
+}
+
+.friendly-nevron-item.unresolved {
+  border-left-color: #6fa8ff;
+}
+
+.friendly-nevron-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.friendly-nevron-name {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.friendly-nevron-status {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.friendly-nevron-status.peace {
+  background: rgba(46, 204, 113, 0.2);
+  color: #7dffb0;
+}
+
+.friendly-nevron-status.killed {
+  background: rgba(231, 76, 60, 0.2);
+  color: #ffb3ab;
+}
+
+.friendly-nevron-status.unresolved {
+  background: rgba(111, 168, 255, 0.18);
+  color: #bfd8ff;
+}
+
+.friendly-nevron-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friendly-nevron-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.friendly-nevron-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.friendly-nevron-description .friendly-nevron-value {
+  color: var(--text-secondary);
+}

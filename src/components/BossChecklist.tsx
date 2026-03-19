@@ -60,6 +60,11 @@ interface LostGestralRowProps {
   t: (key: string, params?: Record<string, string | number>) => string
 }
 
+interface FriendlyNevronRowProps {
+  friendlyNevron: FriendlyNevronEntry
+  t: (key: string, params?: Record<string, string | number>) => string
+}
+
 const CHECKBOX_KILLED = '\u2611'
 const CHECKBOX_ENCOUNTERED = '\u2610'
 const CHECKBOX_UNKNOWN = '\u2B1C'
@@ -216,6 +221,37 @@ function LostGestralRow({ lostGestral, t }: LostGestralRowProps) {
   )
 }
 
+
+function FriendlyNevronRow({ friendlyNevron, t }: FriendlyNevronRowProps) {
+  const summary = friendlyNevron.summary || t('bossList.noFriendlyNevronSummary')
+
+  const statusLabel =
+    friendlyNevron.resolution === 'peace'
+      ? t('bossList.friendlyNevronPeaceful')
+      : friendlyNevron.resolution === 'killed'
+        ? t('bossList.friendlyNevronKilled')
+        : t('bossList.friendlyNevronUnresolved')
+
+  const statusClass =
+    friendlyNevron.resolution === 'peace'
+      ? 'peace'
+      : friendlyNevron.resolution === 'killed'
+        ? 'killed'
+        : 'unresolved'
+
+  return (
+    <div className={`friendly-nevron-item ${statusClass}`}>
+      <div className="friendly-nevron-header">
+        <span className="friendly-nevron-name">{friendlyNevron.name}</span>
+        <span className={`friendly-nevron-status ${statusClass}`}>{statusLabel}</span>
+      </div>
+      <div className="friendly-nevron-meta friendly-nevron-description">
+        <span className="friendly-nevron-label">{t('bossList.friendlyNevronSummaryLabel')}</span>
+        <span className="friendly-nevron-value">{summary}</span>
+      </div>
+    </div>
+  )
+}
 function BossChecklist(props: Props) {
   const {
     bosses,
@@ -273,7 +309,8 @@ function BossChecklist(props: Props) {
           zone.visiblePictos.length > 0 ||
           zone.visibleMonocoFeet.length > 0 ||
           zone.visibleJournals.length > 0 ||
-          zone.visibleLostGestrals.length > 0,
+          zone.visibleLostGestrals.length > 0 ||
+          zone.visibleFriendlyNevrons.length > 0,
       ),
     [filteredZoneGroups],
   )
@@ -343,6 +380,13 @@ function BossChecklist(props: Props) {
                 {t('bossList.lostGestralsCollected', {
                   found: stats.foundLostGestrals.toString(),
                   total: stats.totalLostGestrals.toString(),
+                })}
+              </span>
+              <span className="stat-item total">
+                {t('bossList.friendlyNevronsCollected', {
+                  peaceful: stats.peacefulFriendlyNevrons.toString(),
+                  killed: stats.killedFriendlyNevrons.toString(),
+                  total: stats.totalFriendlyNevrons.toString(),
                 })}
               </span>
             </div>
@@ -487,6 +531,13 @@ function BossChecklist(props: Props) {
                           <LostGestralRow
                             key={`${zone.zoneName}-${lostGestral.id}`}
                             lostGestral={lostGestral}
+                            t={t}
+                          />
+                        ))}
+                        {zone.visibleFriendlyNevrons.map((friendlyNevron) => (
+                          <FriendlyNevronRow
+                            key={`${zone.zoneName}-${friendlyNevron.id}`}
+                            friendlyNevron={friendlyNevron}
                             t={t}
                           />
                         ))}

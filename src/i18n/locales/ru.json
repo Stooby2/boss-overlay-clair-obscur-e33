@@ -26,13 +26,13 @@
     "configurePathInSettings": "Настройте путь к файлу в настройках.",
     "bossesKilled": "🏆 Убито {{killed}} из {{total}} боссов.",
     "addBossManually": "Добавить босса вручную",
-    "searchPlaceholder": "Search bosses, pictos, feet, journals, or lost gestrals...",
+    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, or friendly nevrons...",
     "filterAll": "All",
     "filterKilled": "Убито ({{count}})",
     "filterAlive": "Оставшиеся ({{count}})",
     "expandAll": "Развернуть все локации",
     "collapseAll": "Свернуть все локации",
-    "noResults": "No bosses, pictos, feet, journals, or lost gestrals found",
+    "noResults": "No bosses, pictos, feet, journals, lost gestrals, or friendly nevrons found",
     "autoDetected": "Автоматическое определение пройденных боссов (редактировать нельзя)",
     "markAsAlive": "Пометить как живого",
     "markAsKilled": "Пометить как убитого",
@@ -67,7 +67,13 @@
     "lostGestralFound": "FOUND",
     "lostGestralMissing": "MISSING",
     "lostGestralLocationLabel": "Location",
-    "noLostGestralSummary": "No lost gestral notes recorded"
+    "noLostGestralSummary": "No lost gestral notes recorded",
+    "friendlyNevronsCollected": "\ud83d\udc7e {{peaceful}}\u270c\ufe0f {{killed}}\ud83e\udea6 / {{total}}",
+    "friendlyNevronPeaceful": "PEACE",
+    "friendlyNevronKilled": "KILLED",
+    "friendlyNevronUnresolved": "UNRESOLVED",
+    "friendlyNevronSummaryLabel": "Summary",
+    "noFriendlyNevronSummary": "No Friendly Nevron notes recorded"
   },
   "bossForm": {
     "editTitle": "✏️ Редактировать босса",
@@ -307,3 +313,4 @@
     "eveques": "Епископы"
   }
 }
+

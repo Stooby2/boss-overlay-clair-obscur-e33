@@ -26,13 +26,13 @@
     "configurePathInSettings": "Configurez le chemin du fichier dans les paramètres",
     "bossesKilled": "🏆 {{killed}} / {{total}} boss vaincus",
     "addBossManually": "Ajouter un boss manuellement",
-    "searchPlaceholder": "Search bosses, pictos, feet, journals, or lost gestrals...",
+    "searchPlaceholder": "Search bosses, pictos, feet, journals, lost gestrals, or friendly nevrons...",
     "filterAll": "All",
     "filterKilled": "Vaincus ({{count}})",
     "filterAlive": "Restants ({{count}})",
     "expandAll": "Développer toutes les zones",
     "collapseAll": "Réduire toutes les zones",
-    "noResults": "No bosses, pictos, feet, journals, or lost gestrals found",
+    "noResults": "No bosses, pictos, feet, journals, lost gestrals, or friendly nevrons found",
     "autoDetected": "Boss détecté automatiquement (non modifiable)",
     "markAsAlive": "Marquer comme vivant",
     "markAsKilled": "Marquer comme vaincu",
@@ -67,7 +67,13 @@
     "lostGestralFound": "FOUND",
     "lostGestralMissing": "MISSING",
     "lostGestralLocationLabel": "Location",
-    "noLostGestralSummary": "No lost gestral notes recorded"
+    "noLostGestralSummary": "No lost gestral notes recorded",
+    "friendlyNevronsCollected": "\ud83d\udc7e {{peaceful}}\u270c\ufe0f {{killed}}\ud83e\udea6 / {{total}}",
+    "friendlyNevronPeaceful": "PEACE",
+    "friendlyNevronKilled": "KILLED",
+    "friendlyNevronUnresolved": "UNRESOLVED",
+    "friendlyNevronSummaryLabel": "Summary",
+    "noFriendlyNevronSummary": "No Friendly Nevron notes recorded"
   },
   "bossForm": {
     "editTitle": "✏️ Modifier le boss",
@@ -307,3 +313,4 @@
     "eveques": "Évêques"
   }
 }
+
