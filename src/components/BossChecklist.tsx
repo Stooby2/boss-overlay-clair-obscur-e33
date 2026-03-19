@@ -190,6 +190,7 @@ function BossChecklist(props: Props) {
     pictos,
     monocoFeet,
     journals,
+    lostGestrals,
     currentLocation,
     filterMode,
     onFilterModeChange,
@@ -202,8 +203,16 @@ function BossChecklist(props: Props) {
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set())
 
   const checklistModel = useMemo(
-    () => buildChecklistModel(bosses, pictos, monocoFeet, journals, currentLocation),
-    [bosses, pictos, monocoFeet, journals, currentLocation],
+    () =>
+      buildChecklistModel(
+        bosses,
+        pictos,
+        monocoFeet,
+        journals,
+        lostGestrals,
+        currentLocation,
+      ),
+    [bosses, pictos, monocoFeet, journals, lostGestrals, currentLocation],
   )
 
   useEffect(() => {

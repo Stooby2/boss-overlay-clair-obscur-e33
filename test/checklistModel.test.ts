@@ -1,4 +1,4 @@
-﻿import assert from 'node:assert/strict'
+import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
@@ -14,6 +14,7 @@ import {
 import type { Boss } from '../src/types/Boss.ts'
 import type { CurrentLocation } from '../src/types/CurrentLocation.ts'
 import type { JournalEntry } from '../src/types/JournalEntry.ts'
+import type { LostGestralEntry } from '../src/types/LostGestralEntry.ts'
 import type { MonocoFoot } from '../src/types/MonocoFoot.ts'
 import type { Picto } from '../src/types/Picto.ts'
 
@@ -165,6 +166,25 @@ const journals: JournalEntry[] = [
   },
 ]
 
+const lostGestrals: LostGestralEntry[] = [
+  {
+    id: 'FindLostGestral_1',
+    name: 'Lost Gestral 1',
+    found: true,
+    zoneName: 'the_continent',
+    sourceZoneName: 'Continent Map',
+    summary: "Right outside the Esquie's Nest portal.",
+  },
+  {
+    id: 'FindLostGestral_2',
+    name: 'Lost Gestral 2',
+    found: false,
+    zoneName: 'the_continent',
+    sourceZoneName: 'Continent Map',
+    summary: 'Just east of the ramp leading to the Stone Wave Cliffs portal.',
+  },
+]
+
 const currentLocation: CurrentLocation = {
   levelKey: 'Level_Sirene_Main_V2',
   spawnTag: 'Level.SpawnPoint.Generic.Dynamic',
@@ -214,7 +234,14 @@ assert.deepEqual(normalizeZoneName('mystery_woods', 'boss'), {
   matched: false,
 })
 
-const model = buildChecklistModel(bosses, pictos, monocoFeet, journals, currentLocation)
+const model = buildChecklistModel(
+  bosses,
+  pictos,
+  monocoFeet,
+  journals,
+  lostGestrals,
+  currentLocation,
+)
 const summary = summarizeChecklist(model)
 assert.deepEqual(summary, {
   killedBosses: 1,
@@ -229,10 +256,14 @@ assert.deepEqual(summary, {
   foundJournals: 1,
   totalJournals: 3,
   remainingJournals: 2,
+  foundLostGestrals: 1,
+  totalLostGestrals: 2,
+  remainingLostGestrals: 1,
   currentZoneRemainingBosses: 0,
   currentZoneRemainingPictos: 1,
   currentZoneRemainingFeet: 1,
   currentZoneRemainingJournals: 1,
+  currentZoneRemainingLostGestrals: 0,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
 assert.deepEqual(
@@ -295,6 +326,8 @@ const theContinent = model.zoneGroups.find((zone) => zone.zoneName === 'the_cont
 assert.ok(theContinent)
 assert.equal(theContinent.recommendedMinLevel, undefined)
 assert.equal(theContinent.recommendedMaxLevel, undefined)
+assert.equal(theContinent.totalLostGestrals, 2)
+assert.equal(theContinent.foundLostGestrals, 1)
 
 const mysteryWoods = model.zoneGroups.find(
   (zone) => zone.zoneName === 'mystery_woods',
@@ -321,15 +354,19 @@ const foundGroups = filterChecklistGroups(model, {
   searchTerm: '',
   translateBossName: (value) => value,
 })
-assert.equal(foundGroups.length, 2)
-assert.equal(foundGroups[0].visibleBosses.length + foundGroups[1].visibleBosses.length, 1)
-assert.equal(foundGroups[0].visiblePictos.length + foundGroups[1].visiblePictos.length, 1)
+assert.equal(foundGroups.length, 3)
+assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visibleBosses.length, 0), 1)
+assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visiblePictos.length, 0), 1)
 assert.equal(
-  foundGroups[0].visibleMonocoFeet.length + foundGroups[1].visibleMonocoFeet.length,
+  foundGroups.reduce((sum, zone) => sum + zone.visibleMonocoFeet.length, 0),
   1,
 )
 assert.equal(
   foundGroups.reduce((sum, zone) => sum + zone.visibleJournals.length, 0),
+  1,
+)
+assert.equal(
+  foundGroups.reduce((sum, zone) => sum + zone.visibleLostGestrals.length, 0),
   1,
 )
 
@@ -360,6 +397,7 @@ assert.equal(currentZoneGroups[0].visibleMonocoFeet.length, 1)
 assert.equal(currentZoneGroups[0].visibleMonocoFeet[0].skillName, 'Cultist Blood')
 assert.equal(currentZoneGroups[0].visibleJournals.length, 1)
 assert.equal(currentZoneGroups[0].visibleJournals[0].name, 'Journal - Forgotten Notes')
+assert.equal(currentZoneGroups[0].visibleLostGestrals.length, 0)
 
 const currentZoneSearchMiss = filterChecklistGroups(model, {
   filterMode: 'current_zone',
@@ -377,6 +415,16 @@ assert.equal(searchByJournalSummary.length, 1)
 assert.equal(searchByJournalSummary[0].zoneName, 'the_small_bourgeon')
 assert.equal(searchByJournalSummary[0].visibleJournals.length, 1)
 
+const searchByLostGestralSummary = filterChecklistGroups(model, {
+  filterMode: 'remaining',
+  searchTerm: 'stone wave cliffs portal',
+  translateBossName: (value) => value,
+})
+assert.equal(searchByLostGestralSummary.length, 1)
+assert.equal(searchByLostGestralSummary[0].zoneName, 'the_continent')
+assert.equal(searchByLostGestralSummary[0].visibleLostGestrals.length, 1)
+assert.equal(searchByLostGestralSummary[0].visibleLostGestrals[0].id, 'FindLostGestral_2')
+
 const searchByMonsterName = filterChecklistGroups(model, {
   filterMode: 'all',
   searchTerm: 'abbest',
@@ -388,13 +436,20 @@ assert.equal(
   2,
 )
 
-const unresolvedCurrentZone = buildChecklistModel(bosses, pictos, monocoFeet, journals, {
-  levelKey: 'Level_Unknown_Debug',
-  spawnTag: 'Level.SpawnPoint.Unknown.Debug',
-  areaName: 'Mystery Depths',
-  subLocationName: null,
-  displayName: 'Mystery Depths',
-})
+const unresolvedCurrentZone = buildChecklistModel(
+  bosses,
+  pictos,
+  monocoFeet,
+  journals,
+  lostGestrals,
+  {
+    levelKey: 'Level_Unknown_Debug',
+    spawnTag: 'Level.SpawnPoint.Unknown.Debug',
+    areaName: 'Mystery Depths',
+    subLocationName: null,
+    displayName: 'Mystery Depths',
+  },
+)
 assert.equal(unresolvedCurrentZone.currentZoneName, 'Mystery Depths')
 assert.deepEqual(unresolvedCurrentZone.unmatchedZoneNames, [
   {

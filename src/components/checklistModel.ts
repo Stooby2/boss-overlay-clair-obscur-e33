@@ -1,12 +1,13 @@
 import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
 import type { JournalEntry } from '../types/JournalEntry'
+import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
 import { zoneLevelsByZoneName } from './zoneLevels.ts'
 import { DEFAULT_ZONE_NAME, toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
-export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'location'
+export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'lost_gestral' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
@@ -26,6 +27,7 @@ export interface ChecklistZoneGroup {
   pictos: Picto[]
   monocoFeet: MonocoFoot[]
   journals: JournalEntry[]
+  lostGestrals: LostGestralEntry[]
   killed: number
   encountered: number
   totalBosses: number
@@ -35,6 +37,8 @@ export interface ChecklistZoneGroup {
   totalFeet: number
   foundJournals: number
   totalJournals: number
+  foundLostGestrals: number
+  totalLostGestrals: number
   recommendedMinLevel?: number
   recommendedMaxLevel?: number
   unmatchedEntries: UnmatchedZoneName[]
@@ -45,6 +49,7 @@ export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
   visiblePictos: Picto[]
   visibleMonocoFeet: MonocoFoot[]
   visibleJournals: JournalEntry[]
+  visibleLostGestrals: LostGestralEntry[]
 }
 
 export interface ChecklistModel {
@@ -53,6 +58,7 @@ export interface ChecklistModel {
   currentZoneName: string | null
   monocoFeet: MonocoFoot[]
   journals: JournalEntry[]
+  lostGestrals: LostGestralEntry[]
 }
 
 export interface ChecklistSummary {
@@ -68,10 +74,14 @@ export interface ChecklistSummary {
   foundJournals: number
   totalJournals: number
   remainingJournals: number
+  foundLostGestrals: number
+  totalLostGestrals: number
+  remainingLostGestrals: number
   currentZoneRemainingBosses: number
   currentZoneRemainingPictos: number
   currentZoneRemainingFeet: number
   currentZoneRemainingJournals: number
+  currentZoneRemainingLostGestrals: number
 }
 
 export interface ChecklistFilterOptions {
@@ -119,6 +129,15 @@ function monocoFootMatchesSearch(foot: MonocoFoot, term: string): boolean {
 function journalMatchesSearch(journal: JournalEntry, term: string): boolean {
   return [journal.name, journal.sourceZoneName, journal.summary].some((value) =>
     value.toLowerCase().includes(term),
+  )
+}
+
+function lostGestralMatchesSearch(
+  lostGestral: LostGestralEntry,
+  term: string,
+): boolean {
+  return [lostGestral.name, lostGestral.sourceZoneName, lostGestral.summary].some(
+    (value) => value.toLowerCase().includes(term),
   )
 }
 
@@ -174,6 +193,21 @@ function journalMatchesFilter(
 
   if (filterMode === 'remaining' || filterMode === 'current_zone') {
     return !journal.found
+  }
+
+  return true
+}
+
+function lostGestralMatchesFilter(
+  lostGestral: LostGestralEntry,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return lostGestral.found
+  }
+
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
+    return !lostGestral.found
   }
 
   return true
@@ -270,6 +304,7 @@ export function buildChecklistModel(
   pictos: Picto[],
   monocoFeet: MonocoFoot[],
   journals: JournalEntry[],
+  lostGestrals: LostGestralEntry[],
   currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
@@ -287,6 +322,7 @@ export function buildChecklistModel(
       pictos: [],
       monocoFeet: [],
       journals: [],
+      lostGestrals: [],
       killed: 0,
       encountered: 0,
       totalBosses: 0,
@@ -296,6 +332,8 @@ export function buildChecklistModel(
       totalFeet: 0,
       foundJournals: 0,
       totalJournals: 0,
+      foundLostGestrals: 0,
+      totalLostGestrals: 0,
       recommendedMinLevel: zoneLevelsByZoneName[zoneName]?.recommendedMinLevel,
       recommendedMaxLevel: zoneLevelsByZoneName[zoneName]?.recommendedMaxLevel,
       unmatchedEntries: [],
@@ -397,6 +435,26 @@ export function buildChecklistModel(
     }
   }
 
+  for (const lostGestral of lostGestrals) {
+    const normalized = normalizeZoneName(lostGestral.zoneName, 'lost_gestral')
+    const group = getOrCreateGroup(normalized.zoneName)
+    group.lostGestrals.push(lostGestral)
+    group.totalLostGestrals += 1
+    if (lostGestral.found) {
+      group.foundLostGestrals += 1
+    }
+
+    if (!normalized.matched && lostGestral.zoneName.trim().length > 0) {
+      const unmatched = {
+        source: 'lost_gestral' as const,
+        rawName: lostGestral.zoneName.trim(),
+        fallbackZoneName: normalized.zoneName,
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
+    }
+  }
+
   const normalizedLocation = normalizeCurrentLocation(currentLocation)
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
@@ -406,6 +464,7 @@ export function buildChecklistModel(
     currentZoneName: normalizedLocation.currentZoneName,
     monocoFeet,
     journals,
+    lostGestrals,
   }
 }
 
@@ -427,6 +486,8 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
   const foundFeet = model.monocoFeet.filter((foot) => foot.found).length
   const totalJournals = model.journals.length
   const foundJournals = model.journals.filter((journal) => journal.found).length
+  const totalLostGestrals = model.lostGestrals.length
+  const foundLostGestrals = model.lostGestrals.filter((lostGestral) => lostGestral.found).length
   const currentZone = model.currentZoneName
     ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
     : null
@@ -444,6 +505,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundJournals,
     totalJournals,
     remainingJournals: totalJournals - foundJournals,
+    foundLostGestrals,
+    totalLostGestrals,
+    remainingLostGestrals: totalLostGestrals - foundLostGestrals,
     currentZoneRemainingBosses: currentZone
       ? currentZone.totalBosses - currentZone.killed
       : 0,
@@ -455,6 +519,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
       : 0,
     currentZoneRemainingJournals: currentZone
       ? currentZone.totalJournals - currentZone.foundJournals
+      : 0,
+    currentZoneRemainingLostGestrals: currentZone
+      ? currentZone.totalLostGestrals - currentZone.foundLostGestrals
       : 0,
   }
 }
@@ -502,12 +569,20 @@ export function filterChecklistGroups(
           (searchTerm.length === 0 || journalMatchesSearch(journal, searchTerm)),
       )
 
+      const visibleLostGestrals = zone.lostGestrals.filter(
+        (lostGestral) =>
+          lostGestralMatchesFilter(lostGestral, options.filterMode) &&
+          (searchTerm.length === 0 ||
+            lostGestralMatchesSearch(lostGestral, searchTerm)),
+      )
+
       return {
         ...zone,
         visibleBosses,
         visiblePictos,
         visibleMonocoFeet,
         visibleJournals,
+        visibleLostGestrals,
       }
     })
     .filter(
@@ -515,7 +590,8 @@ export function filterChecklistGroups(
         zone.visibleBosses.length > 0 ||
         zone.visiblePictos.length > 0 ||
         zone.visibleMonocoFeet.length > 0 ||
-        zone.visibleJournals.length > 0,
+        zone.visibleJournals.length > 0 ||
+        zone.visibleLostGestrals.length > 0,
     )
 }
 
@@ -535,3 +611,4 @@ export function reportUnmatchedZoneNames(
     )
   }
 }
+
