@@ -18,6 +18,7 @@ import type { JournalEntry } from '../src/types/JournalEntry.ts'
 import type { LostGestralEntry } from '../src/types/LostGestralEntry.ts'
 import type { MonocoFoot } from '../src/types/MonocoFoot.ts'
 import type { Picto } from '../src/types/Picto.ts'
+import type { WeaponEntry } from '../src/types/WeaponEntry.ts'
 
 async function readJson<T>(path: string): Promise<T> {
   return JSON.parse(await readFile(path, 'utf-8')) as T
@@ -225,6 +226,46 @@ const friendlyNevrons: FriendlyNevronEntry[] = [
     summary: 'Chalier still needs help choosing a weapon.',
   },
 ]
+
+const weapons: WeaponEntry[] = [
+  {
+    id: 'Weapon_SpringFound',
+    name: 'Practice Blade',
+    owner: 'Gustave',
+    found: true,
+    level: 2,
+    equipped: false,
+    zoneName: 'spring_meadows',
+    sourceZoneName: 'Spring Meadows',
+    locationUrl: '',
+    summary: 'Near the first expedition flag.',
+  },
+  {
+    id: 'Weapon_FloatingMissing',
+    name: 'Wave Blade',
+    owner: 'Verso',
+    found: false,
+    level: 0,
+    equipped: false,
+    zoneName: 'floating_cemetery',
+    sourceZoneName: 'Floating Cemetery',
+    locationUrl: '',
+    summary: 'At the collapsed memorial arch.',
+  },
+  {
+    id: 'Weapon_Unmatched',
+    name: 'Unknown Relic',
+    owner: 'Lune',
+    found: false,
+    level: 0,
+    equipped: false,
+    zoneName: 'mystery_woods',
+    sourceZoneName: 'Mystery Woods',
+    locationUrl: '',
+    summary: 'Hidden in the brush.',
+  },
+]
+
 const currentLocation: CurrentLocation = {
   levelKey: 'Level_Sirene_Main_V2',
   spawnTag: 'Level.SpawnPoint.Generic.Dynamic',
@@ -281,6 +322,7 @@ const model = buildChecklistModel(
   journals,
   lostGestrals,
   friendlyNevrons,
+  weapons,
   currentLocation,
 )
 const summary = summarizeChecklist(model)
@@ -304,12 +346,16 @@ assert.deepEqual(summary, {
   killedFriendlyNevrons: 1,
   totalFriendlyNevrons: 3,
   remainingFriendlyNevrons: 1,
+  foundWeapons: 1,
+  totalWeapons: 3,
+  remainingWeapons: 2,
   currentZoneRemainingBosses: 0,
   currentZoneRemainingPictos: 1,
   currentZoneRemainingFeet: 1,
   currentZoneRemainingJournals: 1,
   currentZoneRemainingLostGestrals: 0,
   currentZoneRemainingFriendlyNevrons: 1,
+  currentZoneRemainingWeapons: 1,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
 assert.deepEqual(
@@ -340,6 +386,8 @@ assert.equal(springMeadows.foundJournals, 1)
 assert.equal(springMeadows.totalFriendlyNevrons, 2)
 assert.equal(springMeadows.peacefulFriendlyNevrons, 1)
 assert.equal(springMeadows.killedFriendlyNevrons, 1)
+assert.equal(springMeadows.totalWeapons, 1)
+assert.equal(springMeadows.foundWeapons, 1)
 assert.equal(springMeadows.unmatchedEntries.length, 0)
 assert.equal(springMeadows.recommendedMinLevel, 0)
 assert.equal(springMeadows.recommendedMaxLevel, 0)
@@ -365,6 +413,8 @@ assert.equal(floatingCemetery.foundJournals, 0)
 assert.equal(floatingCemetery.totalFriendlyNevrons, 1)
 assert.equal(floatingCemetery.peacefulFriendlyNevrons, 0)
 assert.equal(floatingCemetery.killedFriendlyNevrons, 0)
+assert.equal(floatingCemetery.totalWeapons, 1)
+assert.equal(floatingCemetery.foundWeapons, 0)
 assert.equal(floatingCemetery.unmatchedEntries.length, 0)
 assert.equal(floatingCemetery.recommendedMinLevel, 60)
 assert.equal(floatingCemetery.recommendedMaxLevel, 70)
@@ -391,11 +441,23 @@ assert.deepEqual(mysteryWoods.unmatchedEntries, [
     rawName: 'mystery_woods',
     fallbackZoneName: 'mystery_woods',
   },
+  {
+    source: 'weapon',
+    rawName: 'mystery_woods',
+    fallbackZoneName: 'mystery_woods',
+  },
 ])
+assert.equal(mysteryWoods.totalWeapons, 1)
+assert.equal(mysteryWoods.foundWeapons, 0)
 
 assert.deepEqual(model.unmatchedZoneNames, [
   {
     source: 'boss',
+    rawName: 'mystery_woods',
+    fallbackZoneName: 'mystery_woods',
+  },
+  {
+    source: 'weapon',
     rawName: 'mystery_woods',
     fallbackZoneName: 'mystery_woods',
   },
@@ -425,6 +487,7 @@ assert.equal(
   foundGroups.reduce((sum, zone) => sum + zone.visibleFriendlyNevrons.length, 0),
   2,
 )
+assert.equal(foundGroups.reduce((sum, zone) => sum + zone.visibleWeapons.length, 0), 1)
 
 const remainingGroups = filterChecklistGroups(model, {
   filterMode: 'remaining',
@@ -456,6 +519,8 @@ assert.equal(currentZoneGroups[0].visibleJournals[0].name, 'Journal - Forgotten 
 assert.equal(currentZoneGroups[0].visibleLostGestrals.length, 0)
 assert.equal(currentZoneGroups[0].visibleFriendlyNevrons.length, 1)
 assert.equal(currentZoneGroups[0].visibleFriendlyNevrons[0].name, 'Chalier Help')
+assert.equal(currentZoneGroups[0].visibleWeapons.length, 1)
+assert.equal(currentZoneGroups[0].visibleWeapons[0].id, 'Weapon_FloatingMissing')
 
 const currentZoneSearchMiss = filterChecklistGroups(model, {
   filterMode: 'current_zone',
@@ -492,6 +557,15 @@ const searchByFriendlyNevronSummary = filterChecklistGroups(model, {
 assert.equal(searchByFriendlyNevronSummary.length, 1)
 assert.equal(searchByFriendlyNevronSummary[0].zoneName, 'floating_cemetery')
 assert.equal(searchByFriendlyNevronSummary[0].visibleFriendlyNevrons.length, 1)
+const searchByWeaponSummary = filterChecklistGroups(model, {
+  filterMode: 'remaining',
+  searchTerm: 'collapsed memorial arch',
+  translateBossName: (value) => value,
+})
+assert.equal(searchByWeaponSummary.length, 1)
+assert.equal(searchByWeaponSummary[0].zoneName, 'floating_cemetery')
+assert.equal(searchByWeaponSummary[0].visibleWeapons.length, 1)
+
 const searchByMonsterName = filterChecklistGroups(model, {
   filterMode: 'all',
   searchTerm: 'abbest',
@@ -510,6 +584,7 @@ const unresolvedCurrentZone = buildChecklistModel(
   journals,
   lostGestrals,
   friendlyNevrons,
+  weapons,
   {
     levelKey: 'Level_Unknown_Debug',
     spawnTag: 'Level.SpawnPoint.Unknown.Debug',
@@ -522,6 +597,11 @@ assert.equal(unresolvedCurrentZone.currentZoneName, 'Mystery Depths')
 assert.deepEqual(unresolvedCurrentZone.unmatchedZoneNames, [
   {
     source: 'boss',
+    rawName: 'mystery_woods',
+    fallbackZoneName: 'mystery_woods',
+  },
+  {
+    source: 'weapon',
     rawName: 'mystery_woods',
     fallbackZoneName: 'mystery_woods',
   },
@@ -548,7 +628,7 @@ reportUnmatchedZoneNames(model.unmatchedZoneNames, (message) => {
   logged.push(message)
 })
 
-assert.equal(logged.length, 1)
+assert.equal(logged.length, 2)
 assert.match(logged[0], /mystery_woods/)
 
 const rootDir = process.cwd()

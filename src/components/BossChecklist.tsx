@@ -283,9 +283,10 @@ function BossChecklist(props: Props) {
         journals,
         lostGestrals,
         friendlyNevrons,
+        weapons,
         currentLocation,
       ),
-    [bosses, pictos, monocoFeet, journals, lostGestrals, friendlyNevrons, currentLocation],
+    [bosses, pictos, monocoFeet, journals, lostGestrals, friendlyNevrons, weapons, currentLocation],
   )
 
   useEffect(() => {
@@ -558,3 +559,4 @@ function BossChecklist(props: Props) {
 }
 
 export default BossChecklist
+
