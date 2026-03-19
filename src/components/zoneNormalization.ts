@@ -10,6 +10,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
   ],
   ancient_sanctuary: ['ancient_sanctuary', 'Ancient Sanctuary'],
   camp: ['camp', 'Camp'],
+  coastal_cave: ['coastal_cave', 'Coastal Cave'],
   dark_gestral_arena: ['dark_gestral_arena', 'Dark Gestral Arena'],
   endless_night_sanctuary: [
     'endless_night_sanctuary',
@@ -46,7 +47,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
   gestral_beach: ['gestral_beach', 'Gestral Beach'],
   gestral_village: ['gestral_village', 'Gestral Village'],
   hidden_gestral_arena: ['hidden_gestral_arena', 'Hidden Gestral Arena'],
-  isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes'],
+  isle_of_eyes: ['isle_of_eyes', 'Isle of Eyes', 'Isle of the Eyes'],
   lumiere: ['lumiere', 'Lumiere', 'Lumi\u00e8re'],
   lumiere_prologue: ['lumiere_prologue', 'Lumiere - Prologue'],
   monoco_station: ['monoco_station', "Monoco's Station"],
@@ -108,4 +109,5 @@ export function toZoneLookupKey(value: string): string {
     .replace(/\s+/g, ' ')
     .toLowerCase()
 }
+
 
