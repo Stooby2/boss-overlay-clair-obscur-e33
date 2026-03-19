@@ -33,7 +33,8 @@
     "test:journal-parser": "node --experimental-strip-types test/journalParser.test.ts",
     "test:lost-gestrals-catalog": "node --experimental-strip-types test/lostGestralsCatalog.test.ts",
     "test:lost-gestrals-parser": "node --experimental-strip-types test/lostGestralsParser.test.ts",
-    "test:friendly-nevrons-catalog": "node --experimental-strip-types test/friendlyNevronsCatalog.test.ts"
+    "test:friendly-nevrons-catalog": "node --experimental-strip-types test/friendlyNevronsCatalog.test.ts",
+    "test:friendly-nevrons-parser": "node --experimental-strip-types test/friendlyNevronsParser.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {

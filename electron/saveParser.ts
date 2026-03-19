@@ -8,6 +8,11 @@ import { promisify } from 'util'
 import type { Boss } from '../src/types/Boss.js'
 import type { SaveSnapshot } from '../src/types/SaveSnapshot.js'
 import {
+  extractFriendlyNevrons,
+  type FriendlyNevronCatalogFile,
+  type FriendlyNevronSaveData,
+} from './friendlyNevrons.js'
+import {
   extractJournals,
   type JournalCatalogFile,
   type JournalLocationFile,
@@ -58,6 +63,7 @@ let locationCatalog: LocationCatalogFile | null = null
 let journalCatalog: JournalCatalogFile['Journals'] | null = null
 let journalLocations: JournalLocationFile['Journals'] | null = null
 let lostGestralCatalog: LostGestralCatalogFile['LostGestrals'] | null = null
+let friendlyNevronCatalog: FriendlyNevronCatalogFile['FriendlyNevrons'] | null = null
 let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
   null
 let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
@@ -78,7 +84,7 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData {
+interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData, FriendlyNevronSaveData {
   root: {
     properties: PictoSaveProperties & {
       MapToLoad_0?: {
@@ -292,6 +298,26 @@ async function loadLostGestralData() {
   }
 }
 
+async function loadFriendlyNevronData() {
+  if (friendlyNevronCatalog) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('friendly_nevrons.json')
+    console.log('Loading Friendly Nevron catalog from:', catalogPath)
+
+    const catalogContent = await readFile(catalogPath, 'utf-8')
+    const parsedCatalog = JSON.parse(catalogContent) as FriendlyNevronCatalogFile
+    friendlyNevronCatalog = parsedCatalog.FriendlyNevrons
+
+    console.log(`Loaded ${Object.keys(friendlyNevronCatalog).length} Friendly Nevrons`)
+  } catch (error) {
+    console.error('Failed to load Friendly Nevron data:', error)
+    friendlyNevronCatalog = {}
+  }
+}
+
 async function loadMonocoFeetData() {
   if (monocoFeetCatalog && monocoFeetMetadata) {
     return
@@ -387,6 +413,8 @@ function createFallbackSnapshot(): SaveSnapshot {
         : [],
     lostGestrals:
       lostGestralCatalog ? extractLostGestrals({}, lostGestralCatalog) : [],
+    friendlyNevrons:
+      friendlyNevronCatalog ? extractFriendlyNevrons({}, friendlyNevronCatalog) : [],
     location: null,
   }
 }
@@ -408,6 +436,10 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
         : [],
     lostGestrals:
       lostGestralCatalog ? extractLostGestrals(saveData, lostGestralCatalog) : [],
+    friendlyNevrons:
+      friendlyNevronCatalog
+        ? extractFriendlyNevrons(saveData, friendlyNevronCatalog)
+        : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -418,6 +450,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadPictoData()
   await loadJournalData()
   await loadLostGestralData()
+  await loadFriendlyNevronData()
   await loadMonocoFeetData()
 
   try {
@@ -625,3 +658,5 @@ function getMockBosses(): Boss[] {
     },
   ]
 }
+
+
