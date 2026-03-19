@@ -17,6 +17,14 @@ import {
   reportUnmatchedZoneNames,
   summarizeChecklist,
 } from './checklistModel'
+import {
+  applyChecklistFeatureVisibility,
+  buildFilterCountParts,
+  buildZoneStatsParts,
+  type ChecklistFeatureKey,
+  type ChecklistFeatureVisibility,
+  zoneHasVisibleContent,
+} from './checklistVisibility'
 
 interface Props {
   bosses: Boss[]
@@ -29,6 +37,8 @@ interface Props {
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
+  featureVisibility: ChecklistFeatureVisibility
+  onToggleFeatureVisibility: (feature: ChecklistFeatureKey) => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
 }
@@ -290,6 +300,8 @@ function BossChecklist(props: Props) {
     currentLocation,
     filterMode,
     onFilterModeChange,
+    featureVisibility,
+    onToggleFeatureVisibility,
     onToggleBoss,
     allowManualEdit = false,
   } = props
@@ -328,19 +340,29 @@ function BossChecklist(props: Props) {
 
   const stats = useMemo(() => summarizeChecklist(checklistModel), [checklistModel])
 
+  const visibleZoneGroups = useMemo(
+    () => applyChecklistFeatureVisibility(filteredZoneGroups, featureVisibility),
+    [filteredZoneGroups, featureVisibility],
+  )
+
   const renderedZoneGroups = useMemo(
-    () =>
-      filteredZoneGroups.filter(
-        (zone) =>
-          zone.visibleBosses.length > 0 ||
-          zone.visiblePictos.length > 0 ||
-          zone.visibleMonocoFeet.length > 0 ||
-          zone.visibleJournals.length > 0 ||
-          zone.visibleLostGestrals.length > 0 ||
-          zone.visibleFriendlyNevrons.length > 0 ||
-          zone.visibleWeapons.length > 0,
-      ),
-    [filteredZoneGroups],
+    () => visibleZoneGroups.filter((zone) => zoneHasVisibleContent(zone)),
+    [visibleZoneGroups],
+  )
+
+  const foundFilterParts = useMemo(
+    () => buildFilterCountParts(stats, featureVisibility, 'found'),
+    [stats, featureVisibility],
+  )
+
+  const remainingFilterParts = useMemo(
+    () => buildFilterCountParts(stats, featureVisibility, 'remaining'),
+    [stats, featureVisibility],
+  )
+
+  const currentZoneFilterParts = useMemo(
+    () => buildFilterCountParts(stats, featureVisibility, 'current_zone'),
+    [stats, featureVisibility],
   )
 
   const currentLocationLabel =
@@ -380,49 +402,84 @@ function BossChecklist(props: Props) {
         <>
           <div className="stats">
             <div className="stats-summary">
-              <span className="stat-item killed">
+              <button
+                type="button"
+                className={`stat-item stat-toggle killed ${featureVisibility.bosses ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('bosses')}
+                aria-pressed={featureVisibility.bosses}
+              >
                 {t('bossList.bossesKilled', {
                   killed: stats.killedBosses.toString(),
                   total: stats.totalBosses.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.pictos ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('pictos')}
+                aria-pressed={featureVisibility.pictos}
+              >
                 {t('bossList.pictosCollected', {
                   found: stats.foundPictos.toString(),
                   total: stats.totalPictos.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.feet ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('feet')}
+                aria-pressed={featureVisibility.feet}
+              >
                 {t('bossList.feetCollected', {
                   found: stats.foundFeet.toString(),
                   total: stats.totalFeet.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.journals ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('journals')}
+                aria-pressed={featureVisibility.journals}
+              >
                 {t('bossList.journalsCollected', {
                   found: stats.foundJournals.toString(),
                   total: stats.totalJournals.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.lostGestrals ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('lostGestrals')}
+                aria-pressed={featureVisibility.lostGestrals}
+              >
                 {t('bossList.lostGestralsCollected', {
                   found: stats.foundLostGestrals.toString(),
                   total: stats.totalLostGestrals.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.friendlyNevrons ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('friendlyNevrons')}
+                aria-pressed={featureVisibility.friendlyNevrons}
+              >
                 {t('bossList.friendlyNevronsCollected', {
                   peaceful: stats.peacefulFriendlyNevrons.toString(),
                   killed: stats.killedFriendlyNevrons.toString(),
                   total: stats.totalFriendlyNevrons.toString(),
                 })}
-              </span>
-              <span className="stat-item total">
+              </button>
+              <button
+                type="button"
+                className={`stat-item stat-toggle total ${featureVisibility.weapons ? 'on' : 'off'}`}
+                onClick={() => onToggleFeatureVisibility('weapons')}
+                aria-pressed={featureVisibility.weapons}
+              >
                 {t('bossList.weaponsCollected', {
                   found: stats.foundWeapons.toString(),
                   total: stats.totalWeapons.toString(),
                 })}
-              </span>
+              </button>
             </div>
           </div>
 
@@ -452,42 +509,36 @@ function BossChecklist(props: Props) {
               className={`filter-btn ${filterMode === 'found' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('found')}
             >
-              {t('bossList.filterFound', {
-                bosses: stats.killedBosses.toString(),
-                pictos: stats.foundPictos.toString(),
-                feet: stats.foundFeet.toString(),
-              })}
+              {foundFilterParts.length > 0
+                ? `${t('bossList.filterFoundLabel')} ${foundFilterParts.join(' ')}`
+                : t('bossList.filterFoundLabel')}
             </button>
             <button
               className={`filter-btn ${filterMode === 'remaining' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('remaining')}
             >
-              {t('bossList.filterRemaining', {
-                bosses: stats.remainingBosses.toString(),
-                pictos: stats.remainingPictos.toString(),
-                feet: stats.remainingFeet.toString(),
-              })}
+              {remainingFilterParts.length > 0
+                ? `${t('bossList.filterRemainingLabel')} ${remainingFilterParts.join(' ')}`
+                : t('bossList.filterRemainingLabel')}
             </button>
             <button
               className={`filter-btn ${filterMode === 'current_zone' ? 'active' : ''}`}
               onClick={() => onFilterModeChange('current_zone')}
             >
-              {t('bossList.filterCurrentZone', {
-                bosses: stats.currentZoneRemainingBosses.toString(),
-                pictos: stats.currentZoneRemainingPictos.toString(),
-                feet: stats.currentZoneRemainingFeet.toString(),
-              })}
+              {currentZoneFilterParts.length > 0
+                ? `${t('bossList.filterCurrentZoneLabel')} ${currentZoneFilterParts.join(' ')}`
+                : t('bossList.filterCurrentZoneLabel')}
             </button>
             <button
               className="filter-btn filter-btn-icon"
               onClick={toggleAllZones}
               title={
-                collapsedZones.size === filteredZoneGroups.length
+                collapsedZones.size === renderedZoneGroups.length
                   ? t('bossList.expandAll')
                   : t('bossList.collapseAll')
               }
             >
-              {collapsedZones.size === filteredZoneGroups.length ? EXPAND_ALL_ICON : COLLAPSE_ALL_ICON}
+              {collapsedZones.size === renderedZoneGroups.length ? EXPAND_ALL_ICON : COLLAPSE_ALL_ICON}
             </button>
           </div>
 
@@ -521,9 +572,11 @@ function BossChecklist(props: Props) {
                       {unmatchedNames.length > 0 && (
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
                       )}
-                      <span className="zone-stats">
-                        B {zone.killed}/{zone.totalBosses} | P {zone.foundPictos}/{zone.totalPictos} | F {zone.foundFeet}/{zone.totalFeet} | J {zone.foundJournals}/{zone.totalJournals} | G {zone.foundLostGestrals}/{zone.totalLostGestrals}
-                      </span>
+                      {buildZoneStatsParts(zone, featureVisibility).length > 0 && (
+                        <span className="zone-stats">
+                          {buildZoneStatsParts(zone, featureVisibility).join(' | ')}
+                        </span>
+                      )}
                     </div>
                     {!isCollapsed && (
                       <div className="zone-items">

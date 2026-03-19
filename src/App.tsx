@@ -2,6 +2,11 @@ import { CSSProperties, useEffect, useMemo, useState } from 'react'
 
 import BossChecklist from './components/BossChecklist'
 import type { ChecklistFilterMode } from './components/checklistModel'
+import {
+  type ChecklistFeatureKey,
+  type ChecklistFeatureVisibility,
+  DEFAULT_CHECKLIST_FEATURE_VISIBILITY,
+} from './components/checklistVisibility'
 import Settings from './components/Settings'
 import { Boss } from './types/Boss'
 import { CurrentLocation } from './types/CurrentLocation'
@@ -40,6 +45,9 @@ function App() {
   )
   const [checklistFilterMode, setChecklistFilterMode] =
     useState<ChecklistFilterMode>('all')
+  const [featureVisibility, setFeatureVisibility] = useState<ChecklistFeatureVisibility>(
+    DEFAULT_CHECKLIST_FEATURE_VISIBILITY,
+  )
 
   useEffect(() => {
     if (window.electronAPI) {
@@ -147,6 +155,14 @@ function App() {
     )
   }
 
+
+  const handleToggleFeatureVisibility = (feature: ChecklistFeatureKey) => {
+    setFeatureVisibility((prev) => ({
+      ...prev,
+      [feature]: !prev[feature],
+    }))
+  }
+
   const overlayTheme = useMemo(
     () => getOverlayTheme(backgroundOpacity),
     [backgroundOpacity],
@@ -189,6 +205,8 @@ function App() {
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
+          featureVisibility={featureVisibility}
+          onToggleFeatureVisibility={handleToggleFeatureVisibility}
           onToggleBoss={handleToggleBoss}
           allowManualEdit={allowManualEdit}
         />
