@@ -1,5 +1,6 @@
 import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { FriendlyNevronEntry } from '../types/FriendlyNevronEntry'
 import type { JournalEntry } from '../types/JournalEntry'
 import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
@@ -7,7 +8,7 @@ import type { Picto } from '../types/Picto'
 import { zoneLevelsByZoneName } from './zoneLevels.ts'
 import { DEFAULT_ZONE_NAME, toZoneLookupKey, ZONE_ALIASES } from './zoneNormalization.ts'
 
-export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'lost_gestral' | 'location'
+export type ZoneSource = 'boss' | 'picto' | 'foot' | 'journal' | 'lost_gestral' | 'friendly_nevron' | 'location'
 export type ChecklistFilterMode = 'all' | 'found' | 'remaining' | 'current_zone'
 
 export interface NormalizedZoneMatch {
@@ -28,6 +29,7 @@ export interface ChecklistZoneGroup {
   monocoFeet: MonocoFoot[]
   journals: JournalEntry[]
   lostGestrals: LostGestralEntry[]
+  friendlyNevrons: FriendlyNevronEntry[]
   killed: number
   encountered: number
   totalBosses: number
@@ -39,6 +41,9 @@ export interface ChecklistZoneGroup {
   totalJournals: number
   foundLostGestrals: number
   totalLostGestrals: number
+  peacefulFriendlyNevrons: number
+  killedFriendlyNevrons: number
+  totalFriendlyNevrons: number
   recommendedMinLevel?: number
   recommendedMaxLevel?: number
   unmatchedEntries: UnmatchedZoneName[]
@@ -50,6 +55,7 @@ export interface FilteredChecklistZoneGroup extends ChecklistZoneGroup {
   visibleMonocoFeet: MonocoFoot[]
   visibleJournals: JournalEntry[]
   visibleLostGestrals: LostGestralEntry[]
+  visibleFriendlyNevrons: FriendlyNevronEntry[]
 }
 
 export interface ChecklistModel {
@@ -59,6 +65,7 @@ export interface ChecklistModel {
   monocoFeet: MonocoFoot[]
   journals: JournalEntry[]
   lostGestrals: LostGestralEntry[]
+  friendlyNevrons: FriendlyNevronEntry[]
 }
 
 export interface ChecklistSummary {
@@ -77,11 +84,16 @@ export interface ChecklistSummary {
   foundLostGestrals: number
   totalLostGestrals: number
   remainingLostGestrals: number
+  peacefulFriendlyNevrons: number
+  killedFriendlyNevrons: number
+  totalFriendlyNevrons: number
+  remainingFriendlyNevrons: number
   currentZoneRemainingBosses: number
   currentZoneRemainingPictos: number
   currentZoneRemainingFeet: number
   currentZoneRemainingJournals: number
   currentZoneRemainingLostGestrals: number
+  currentZoneRemainingFriendlyNevrons: number
 }
 
 export interface ChecklistFilterOptions {
@@ -141,6 +153,16 @@ function lostGestralMatchesSearch(
   )
 }
 
+function friendlyNevronMatchesSearch(
+  friendlyNevron: FriendlyNevronEntry,
+  term: string,
+): boolean {
+  return [
+    friendlyNevron.name,
+    friendlyNevron.sourceZoneName,
+    friendlyNevron.summary,
+  ].some((value) => value.toLowerCase().includes(term))
+}
 function bossMatchesFilter(boss: Boss, filterMode: ChecklistFilterMode): boolean {
   if (filterMode === 'found') {
     return boss.encountered && boss.killed
@@ -213,6 +235,20 @@ function lostGestralMatchesFilter(
   return true
 }
 
+function friendlyNevronMatchesFilter(
+  friendlyNevron: FriendlyNevronEntry,
+  filterMode: ChecklistFilterMode,
+): boolean {
+  if (filterMode === 'found') {
+    return friendlyNevron.isResolved
+  }
+
+  if (filterMode === 'remaining' || filterMode === 'current_zone') {
+    return !friendlyNevron.isResolved
+  }
+
+  return true
+}
 export function normalizeZoneName(
   rawName: string | undefined,
   _source: ZoneSource,
@@ -305,6 +341,7 @@ export function buildChecklistModel(
   monocoFeet: MonocoFoot[],
   journals: JournalEntry[],
   lostGestrals: LostGestralEntry[],
+  friendlyNevrons: FriendlyNevronEntry[],
   currentLocation?: CurrentLocation | null,
 ): ChecklistModel {
   const groups = new Map<string, ChecklistZoneGroup>()
@@ -323,6 +360,7 @@ export function buildChecklistModel(
       monocoFeet: [],
       journals: [],
       lostGestrals: [],
+      friendlyNevrons: [],
       killed: 0,
       encountered: 0,
       totalBosses: 0,
@@ -334,6 +372,9 @@ export function buildChecklistModel(
       totalJournals: 0,
       foundLostGestrals: 0,
       totalLostGestrals: 0,
+      peacefulFriendlyNevrons: 0,
+      killedFriendlyNevrons: 0,
+      totalFriendlyNevrons: 0,
       recommendedMinLevel: zoneLevelsByZoneName[zoneName]?.recommendedMinLevel,
       recommendedMaxLevel: zoneLevelsByZoneName[zoneName]?.recommendedMaxLevel,
       unmatchedEntries: [],
@@ -455,6 +496,32 @@ export function buildChecklistModel(
     }
   }
 
+
+  for (const friendlyNevron of friendlyNevrons) {
+    const normalized = normalizeZoneName(
+      friendlyNevron.zoneName,
+      'friendly_nevron',
+    )
+    const group = getOrCreateGroup(normalized.zoneName)
+    group.friendlyNevrons.push(friendlyNevron)
+    group.totalFriendlyNevrons += 1
+    if (friendlyNevron.isPeaceful) {
+      group.peacefulFriendlyNevrons += 1
+    }
+    if (friendlyNevron.isKilled) {
+      group.killedFriendlyNevrons += 1
+    }
+
+    if (!normalized.matched && friendlyNevron.zoneName.trim().length > 0) {
+      const unmatched = {
+        source: 'friendly_nevron' as const,
+        rawName: friendlyNevron.zoneName.trim(),
+        fallbackZoneName: normalized.zoneName,
+      }
+      unmatchedZoneNames.push(unmatched)
+      group.unmatchedEntries.push(unmatched)
+    }
+  }
   const normalizedLocation = normalizeCurrentLocation(currentLocation)
   unmatchedZoneNames.push(...normalizedLocation.unmatchedLocation)
 
@@ -465,6 +532,7 @@ export function buildChecklistModel(
     monocoFeet,
     journals,
     lostGestrals,
+    friendlyNevrons,
   }
 }
 
@@ -488,6 +556,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
   const foundJournals = model.journals.filter((journal) => journal.found).length
   const totalLostGestrals = model.lostGestrals.length
   const foundLostGestrals = model.lostGestrals.filter((lostGestral) => lostGestral.found).length
+  const totalFriendlyNevrons = model.friendlyNevrons.length
+  const peacefulFriendlyNevrons = model.friendlyNevrons.filter((friendlyNevron) => friendlyNevron.isPeaceful).length
+  const killedFriendlyNevrons = model.friendlyNevrons.filter((friendlyNevron) => friendlyNevron.isKilled).length
   const currentZone = model.currentZoneName
     ? model.zoneGroups.find((zone) => zone.zoneName === model.currentZoneName) ?? null
     : null
@@ -508,6 +579,10 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
     foundLostGestrals,
     totalLostGestrals,
     remainingLostGestrals: totalLostGestrals - foundLostGestrals,
+    peacefulFriendlyNevrons,
+    killedFriendlyNevrons,
+    totalFriendlyNevrons,
+    remainingFriendlyNevrons: totalFriendlyNevrons - peacefulFriendlyNevrons - killedFriendlyNevrons,
     currentZoneRemainingBosses: currentZone
       ? currentZone.totalBosses - currentZone.killed
       : 0,
@@ -522,6 +597,9 @@ export function summarizeChecklist(model: ChecklistModel): ChecklistSummary {
       : 0,
     currentZoneRemainingLostGestrals: currentZone
       ? currentZone.totalLostGestrals - currentZone.foundLostGestrals
+      : 0,
+    currentZoneRemainingFriendlyNevrons: currentZone
+      ? currentZone.totalFriendlyNevrons - currentZone.peacefulFriendlyNevrons - currentZone.killedFriendlyNevrons
       : 0,
   }
 }
@@ -575,6 +653,12 @@ export function filterChecklistGroups(
           (searchTerm.length === 0 ||
             lostGestralMatchesSearch(lostGestral, searchTerm)),
       )
+      const visibleFriendlyNevrons = zone.friendlyNevrons.filter(
+        (friendlyNevron) =>
+          friendlyNevronMatchesFilter(friendlyNevron, options.filterMode) &&
+          (searchTerm.length === 0 ||
+            friendlyNevronMatchesSearch(friendlyNevron, searchTerm)),
+      )
 
       return {
         ...zone,
@@ -583,6 +667,7 @@ export function filterChecklistGroups(
         visibleMonocoFeet,
         visibleJournals,
         visibleLostGestrals,
+        visibleFriendlyNevrons,
       }
     })
     .filter(
@@ -591,7 +676,8 @@ export function filterChecklistGroups(
         zone.visiblePictos.length > 0 ||
         zone.visibleMonocoFeet.length > 0 ||
         zone.visibleJournals.length > 0 ||
-        zone.visibleLostGestrals.length > 0,
+        zone.visibleLostGestrals.length > 0 ||
+        zone.visibleFriendlyNevrons.length > 0,
     )
 }
 
@@ -611,4 +697,8 @@ export function reportUnmatchedZoneNames(
     )
   }
 }
+
+
+
+
 

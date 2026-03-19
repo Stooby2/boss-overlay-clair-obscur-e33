@@ -1,8 +1,9 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '../i18n'
 import type { Boss } from '../types/Boss'
 import type { CurrentLocation } from '../types/CurrentLocation'
+import type { FriendlyNevronEntry } from '../types/FriendlyNevronEntry'
 import type { JournalEntry } from '../types/JournalEntry'
 import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
@@ -22,6 +23,7 @@ interface Props {
   monocoFeet: MonocoFoot[]
   journals: JournalEntry[]
   lostGestrals: LostGestralEntry[]
+  friendlyNevrons: FriendlyNevronEntry[]
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
@@ -221,6 +223,7 @@ function BossChecklist(props: Props) {
     monocoFeet,
     journals,
     lostGestrals,
+    friendlyNevrons,
     currentLocation,
     filterMode,
     onFilterModeChange,
@@ -240,9 +243,10 @@ function BossChecklist(props: Props) {
         monocoFeet,
         journals,
         lostGestrals,
+        friendlyNevrons,
         currentLocation,
       ),
-    [bosses, pictos, monocoFeet, journals, lostGestrals, currentLocation],
+    [bosses, pictos, monocoFeet, journals, lostGestrals, friendlyNevrons, currentLocation],
   )
 
   useEffect(() => {
@@ -302,7 +306,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 && friendlyNevrons.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -500,3 +504,4 @@ function BossChecklist(props: Props) {
 }
 
 export default BossChecklist
+

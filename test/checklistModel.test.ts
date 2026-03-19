@@ -13,6 +13,7 @@ import {
 } from '../src/components/checklistModel.ts'
 import type { Boss } from '../src/types/Boss.ts'
 import type { CurrentLocation } from '../src/types/CurrentLocation.ts'
+import type { FriendlyNevronEntry } from '../src/types/FriendlyNevronEntry.ts'
 import type { JournalEntry } from '../src/types/JournalEntry.ts'
 import type { LostGestralEntry } from '../src/types/LostGestralEntry.ts'
 import type { MonocoFoot } from '../src/types/MonocoFoot.ts'
@@ -185,6 +186,45 @@ const lostGestrals: LostGestralEntry[] = [
   },
 ]
 
+
+const friendlyNevrons: FriendlyNevronEntry[] = [
+  {
+    id: 'Nevron_JarNeedLight',
+    objectiveId: 'KilledJar',
+    name: "Jar's Light",
+    resolution: 'peace',
+    isKilled: false,
+    isPeaceful: true,
+    isResolved: true,
+    zoneName: 'spring_meadows',
+    sourceZoneName: 'Spring Meadows',
+    summary: 'Bring Jar some light.',
+  },
+  {
+    id: 'Nevron_Hexga',
+    objectiveId: 'KillCompletedHexga',
+    name: 'Hexga Crystals',
+    resolution: 'killed',
+    isKilled: true,
+    isPeaceful: false,
+    isResolved: true,
+    zoneName: 'spring_meadows',
+    sourceZoneName: 'Spring Meadows',
+    summary: 'You killed Hexga instead of helping.',
+  },
+  {
+    id: 'Nevron_WeaponlessChalier',
+    objectiveId: 'KillChalier',
+    name: 'Chalier Help',
+    resolution: 'unresolved',
+    isKilled: false,
+    isPeaceful: false,
+    isResolved: false,
+    zoneName: 'floating_cemetery',
+    sourceZoneName: 'Floating Cemetery',
+    summary: 'Chalier still needs help choosing a weapon.',
+  },
+]
 const currentLocation: CurrentLocation = {
   levelKey: 'Level_Sirene_Main_V2',
   spawnTag: 'Level.SpawnPoint.Generic.Dynamic',
@@ -240,6 +280,7 @@ const model = buildChecklistModel(
   monocoFeet,
   journals,
   lostGestrals,
+  friendlyNevrons,
   currentLocation,
 )
 const summary = summarizeChecklist(model)
@@ -259,11 +300,16 @@ assert.deepEqual(summary, {
   foundLostGestrals: 1,
   totalLostGestrals: 2,
   remainingLostGestrals: 1,
+  peacefulFriendlyNevrons: 1,
+  killedFriendlyNevrons: 1,
+  totalFriendlyNevrons: 3,
+  remainingFriendlyNevrons: 1,
   currentZoneRemainingBosses: 0,
   currentZoneRemainingPictos: 1,
   currentZoneRemainingFeet: 1,
   currentZoneRemainingJournals: 1,
   currentZoneRemainingLostGestrals: 0,
+  currentZoneRemainingFriendlyNevrons: 1,
 })
 assert.equal(model.currentZoneName, 'floating_cemetery')
 assert.deepEqual(
@@ -291,6 +337,9 @@ assert.equal(springMeadows.totalPictos, 1)
 assert.equal(springMeadows.totalFeet, 1)
 assert.equal(springMeadows.totalJournals, 1)
 assert.equal(springMeadows.foundJournals, 1)
+assert.equal(springMeadows.totalFriendlyNevrons, 2)
+assert.equal(springMeadows.peacefulFriendlyNevrons, 1)
+assert.equal(springMeadows.killedFriendlyNevrons, 1)
 assert.equal(springMeadows.unmatchedEntries.length, 0)
 assert.equal(springMeadows.recommendedMinLevel, 0)
 assert.equal(springMeadows.recommendedMaxLevel, 0)
@@ -313,6 +362,9 @@ assert.equal(floatingCemetery.foundFeet, 1)
 assert.equal(floatingCemetery.totalFeet, 2)
 assert.equal(floatingCemetery.totalJournals, 1)
 assert.equal(floatingCemetery.foundJournals, 0)
+assert.equal(floatingCemetery.totalFriendlyNevrons, 1)
+assert.equal(floatingCemetery.peacefulFriendlyNevrons, 0)
+assert.equal(floatingCemetery.killedFriendlyNevrons, 0)
 assert.equal(floatingCemetery.unmatchedEntries.length, 0)
 assert.equal(floatingCemetery.recommendedMinLevel, 60)
 assert.equal(floatingCemetery.recommendedMaxLevel, 70)
@@ -369,6 +421,10 @@ assert.equal(
   foundGroups.reduce((sum, zone) => sum + zone.visibleLostGestrals.length, 0),
   1,
 )
+assert.equal(
+  foundGroups.reduce((sum, zone) => sum + zone.visibleFriendlyNevrons.length, 0),
+  2,
+)
 
 const remainingGroups = filterChecklistGroups(model, {
   filterMode: 'remaining',
@@ -398,6 +454,8 @@ assert.equal(currentZoneGroups[0].visibleMonocoFeet[0].skillName, 'Cultist Blood
 assert.equal(currentZoneGroups[0].visibleJournals.length, 1)
 assert.equal(currentZoneGroups[0].visibleJournals[0].name, 'Journal - Forgotten Notes')
 assert.equal(currentZoneGroups[0].visibleLostGestrals.length, 0)
+assert.equal(currentZoneGroups[0].visibleFriendlyNevrons.length, 1)
+assert.equal(currentZoneGroups[0].visibleFriendlyNevrons[0].name, 'Chalier Help')
 
 const currentZoneSearchMiss = filterChecklistGroups(model, {
   filterMode: 'current_zone',
@@ -425,6 +483,15 @@ assert.equal(searchByLostGestralSummary[0].zoneName, 'the_continent')
 assert.equal(searchByLostGestralSummary[0].visibleLostGestrals.length, 1)
 assert.equal(searchByLostGestralSummary[0].visibleLostGestrals[0].id, 'FindLostGestral_2')
 
+
+const searchByFriendlyNevronSummary = filterChecklistGroups(model, {
+  filterMode: 'remaining',
+  searchTerm: 'choosing a weapon',
+  translateBossName: (value) => value,
+})
+assert.equal(searchByFriendlyNevronSummary.length, 1)
+assert.equal(searchByFriendlyNevronSummary[0].zoneName, 'floating_cemetery')
+assert.equal(searchByFriendlyNevronSummary[0].visibleFriendlyNevrons.length, 1)
 const searchByMonsterName = filterChecklistGroups(model, {
   filterMode: 'all',
   searchTerm: 'abbest',
@@ -442,6 +509,7 @@ const unresolvedCurrentZone = buildChecklistModel(
   monocoFeet,
   journals,
   lostGestrals,
+  friendlyNevrons,
   {
     levelKey: 'Level_Unknown_Debug',
     spawnTag: 'Level.SpawnPoint.Unknown.Debug',
@@ -506,3 +574,4 @@ assert.equal(
 )
 
 console.log('checklistModel tests passed')
+

@@ -28,7 +28,7 @@ function App() {
   const [monocoFeet, setMonocoFeet] = useState<MonocoFoot[]>([])
   const [journals, setJournals] = useState<JournalEntry[]>([])
   const [lostGestrals, setLostGestrals] = useState<LostGestralEntry[]>([])
-  const [, setFriendlyNevrons] = useState<SaveSnapshot['friendlyNevrons']>([])
+  const [friendlyNevrons, setFriendlyNevrons] = useState<SaveSnapshot['friendlyNevrons']>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -225,6 +225,7 @@ function App() {
           monocoFeet={monocoFeet}
           journals={journals}
           lostGestrals={lostGestrals}
+          friendlyNevrons={friendlyNevrons}
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
@@ -238,3 +239,4 @@ function App() {
 }
 
 export default App
+
