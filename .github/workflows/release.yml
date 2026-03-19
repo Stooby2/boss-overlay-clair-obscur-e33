@@ -39,7 +39,7 @@ jobs:
         run: npm run lint
 
       - name: Build Windows release files
-        run: npm run build
+        run: npm run build:ci
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
@@ -54,6 +54,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             release/*.exe
             release/*.blockmap
