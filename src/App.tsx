@@ -8,6 +8,7 @@ import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
 import { CurrentLocation } from './types/CurrentLocation'
 import { JournalEntry } from './types/JournalEntry'
+import { LostGestralEntry } from './types/LostGestralEntry'
 import { MonocoFoot } from './types/MonocoFoot'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
@@ -26,6 +27,7 @@ function App() {
   const [pictos, setPictos] = useState<Picto[]>([])
   const [monocoFeet, setMonocoFeet] = useState<MonocoFoot[]>([])
   const [journals, setJournals] = useState<JournalEntry[]>([])
+  const [lostGestrals, setLostGestrals] = useState<LostGestralEntry[]>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -77,6 +79,7 @@ function App() {
         setPictos(snapshot.pictos)
         setMonocoFeet(snapshot.monocoFeet)
         setJournals(snapshot.journals)
+        setLostGestrals(snapshot.lostGestrals)
         setLocation(snapshot.location)
       })
 
@@ -219,6 +222,7 @@ function App() {
           pictos={pictos}
           monocoFeet={monocoFeet}
           journals={journals}
+          lostGestrals={lostGestrals}
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
