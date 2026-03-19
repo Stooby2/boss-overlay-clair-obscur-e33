@@ -25,7 +25,7 @@ function requireJournal(
 const rootDir = process.cwd()
 const catalogPath = resolve(rootDir, 'data', 'journals.json')
 const locationsPath = resolve(rootDir, 'data', 'journal_locations.json')
-const exportedSavePath = resolve(rootDir, 'test_save', 'monoco', '26_feet.json')
+const exportedSavePath = resolve(rootDir, 'test_save', 'expedition_0.json')
 
 const catalog = await readJson<JournalCatalogFile>(catalogPath)
 const locations = await readJson<JournalLocationFile>(locationsPath)

@@ -43,14 +43,22 @@ assert.deepEqual(report.resolvedZones.spring_meadows, {
 })
 
 assert.equal(report.resolvedZones.the_continent, undefined)
-assert.deepEqual(report.missingCanonicalZones, ['camp', 'the_continent'])
+assert.deepEqual(report.missingCanonicalZones, [
+  'ancient_gestral_city',
+  'camp',
+  'gestral_beach',
+  'stone_quarry',
+  'the_manor',
+  'the_continent',
+  'the_small_bourgeon',
+])
 assert.equal(report.missingCanonicalZones.includes('the_continent'), true)
 assert.equal(report.missingCanonicalZones.includes('camp'), true)
 assert.equal(report.missingCanonicalZones.includes('flying_waters'), false)
 assert.equal(report.missingCanonicalZones.includes('ancient_sanctuary'), false)
 assert.equal(report.missingCanonicalZones.includes('the_monolith'), false)
-assert.equal(report.unmappedIgnZones.includes('Lost Woods'), true)
-assert.equal(report.unmappedIgnZones.includes('The Chosen Path'), false)
+assert.equal(report.unmappedIgnZones.includes('The Canvas'), true)
+assert.equal(report.unmappedIgnZones.includes('Lost Woods'), false)
 
 assert.deepEqual(
   report.missingCanonicalZones.filter((zoneName) => !ZONE_ALIASES[zoneName]),
@@ -58,4 +66,3 @@ assert.deepEqual(
 )
 
 console.log('zoneLevels tests passed')
-

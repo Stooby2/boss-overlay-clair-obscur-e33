@@ -41,7 +41,8 @@
     "test:checklist-visibility": "node --experimental-strip-types test/checklistVisibility.test.ts",
     "test:music-locations": "node --experimental-strip-types test/musicLocations.test.ts",
     "test:music-catalog": "node --experimental-strip-types test/musicCatalog.test.ts",
-    "test:music-parser": "node --experimental-strip-types test/musicParser.test.ts"
+    "test:music-parser": "node --experimental-strip-types test/musicParser.test.ts",
+    "test:ci": "npm run test:save-parser && npm run test:checklist-model && npm run test:background-opacity && npm run test:current-location && npm run test:monoco-feet-catalog && npm run test:monoco-feet-parser && npm run test:window-state && npm run test:zone-levels && npm run test:zone-level-label && npm run test:journal-locations && npm run test:journal-parser && npm run test:lost-gestrals-catalog && npm run test:lost-gestrals-parser && npm run test:friendly-nevrons-catalog && npm run test:friendly-nevrons-parser && npm run test:weapon-locations && npm run test:weapon-catalog && npm run test:weapon-parser && npm run test:checklist-visibility && npm run test:music-locations && npm run test:music-catalog && npm run test:music-parser"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
