@@ -12,6 +12,7 @@ import { LostGestralEntry } from './types/LostGestralEntry'
 import { MonocoFoot } from './types/MonocoFoot'
 import { Picto } from './types/Picto'
 import { SaveSnapshot } from './types/SaveSnapshot'
+import { WeaponEntry } from './types/WeaponEntry'
 import {
   DEFAULT_BACKGROUND_OPACITY,
   getOverlayTheme,
@@ -29,6 +30,7 @@ function App() {
   const [journals, setJournals] = useState<JournalEntry[]>([])
   const [lostGestrals, setLostGestrals] = useState<LostGestralEntry[]>([])
   const [friendlyNevrons, setFriendlyNevrons] = useState<SaveSnapshot['friendlyNevrons']>([])
+  const [weapons, setWeapons] = useState<WeaponEntry[]>([])
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
@@ -82,6 +84,7 @@ function App() {
         setJournals(snapshot.journals)
         setLostGestrals(snapshot.lostGestrals)
         setFriendlyNevrons(snapshot.friendlyNevrons)
+        setWeapons(snapshot.weapons)
         setLocation(snapshot.location)
       })
 
@@ -226,6 +229,7 @@ function App() {
           journals={journals}
           lostGestrals={lostGestrals}
           friendlyNevrons={friendlyNevrons}
+          weapons={weapons}
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
@@ -239,4 +243,3 @@ function App() {
 }
 
 export default App
-

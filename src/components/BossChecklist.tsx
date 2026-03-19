@@ -8,6 +8,7 @@ import type { JournalEntry } from '../types/JournalEntry'
 import type { LostGestralEntry } from '../types/LostGestralEntry'
 import type { MonocoFoot } from '../types/MonocoFoot'
 import type { Picto } from '../types/Picto'
+import type { WeaponEntry } from '../types/WeaponEntry'
 import { formatZoneLevelLabel } from '../utils/zoneLevelLabel.ts'
 import {
   buildChecklistModel,
@@ -24,6 +25,7 @@ interface Props {
   journals: JournalEntry[]
   lostGestrals: LostGestralEntry[]
   friendlyNevrons: FriendlyNevronEntry[]
+  weapons: WeaponEntry[]
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
@@ -260,6 +262,7 @@ function BossChecklist(props: Props) {
     journals,
     lostGestrals,
     friendlyNevrons,
+    weapons,
     currentLocation,
     filterMode,
     onFilterModeChange,
@@ -343,7 +346,7 @@ function BossChecklist(props: Props) {
 
   return (
     <div className="boss-list">
-      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 && friendlyNevrons.length === 0 ? (
+      {bosses.length === 0 && pictos.length === 0 && monocoFeet.length === 0 && journals.length === 0 && lostGestrals.length === 0 && friendlyNevrons.length === 0 && weapons.length === 0 ? (
         <div className="empty">
           <p>{t('bossList.noData')}</p>
           <p>{t('bossList.configurePathInSettings')}</p>
@@ -555,4 +558,3 @@ function BossChecklist(props: Props) {
 }
 
 export default BossChecklist
-
