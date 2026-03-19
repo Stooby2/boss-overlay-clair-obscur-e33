@@ -1,10 +1,8 @@
 import { CSSProperties, useEffect, useMemo, useState } from 'react'
 
 import BossChecklist from './components/BossChecklist'
-import { BossInfoForm } from './components/BossInfoForm'
 import type { ChecklistFilterMode } from './components/checklistModel'
 import Settings from './components/Settings'
-import { useI18n } from './i18n'
 import { Boss } from './types/Boss'
 import { CurrentLocation } from './types/CurrentLocation'
 import { JournalEntry } from './types/JournalEntry'
@@ -23,7 +21,6 @@ const SETTINGS_ICON = '\u2699\uFE0F'
 const CLOSE_ICON = '\u2715'
 
 function App() {
-  const { t } = useI18n()
   const [bosses, setBosses] = useState<Boss[]>([])
   const [pictos, setPictos] = useState<Picto[]>([])
   const [monocoFeet, setMonocoFeet] = useState<MonocoFoot[]>([])
@@ -34,7 +31,6 @@ function App() {
   const [location, setLocation] = useState<CurrentLocation | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [savePath, setSavePath] = useState('')
-  const [isAddingBoss, setIsAddingBoss] = useState(false)
   const [manualStates, setManualStates] = useState<
     Record<string, { killed: boolean; encountered: boolean }>
   >({})
@@ -116,32 +112,6 @@ function App() {
     }
   }
 
-  const handleSaveBossInfo = async (info: {
-    originalName: string
-    id: string
-    category: string
-    zone: string
-  }) => {
-    if (window.electronAPI) {
-      const result = await window.electronAPI.saveBossInfo(info)
-      if (result.success) {
-        setIsAddingBoss(false)
-      } else {
-        alert(
-          t('bossForm.saveError', { error: result.error || 'Unknown error' }),
-        )
-      }
-    }
-  }
-
-  const handleCancelBossInfo = () => {
-    setIsAddingBoss(false)
-  }
-
-  const handleAddBoss = () => {
-    setIsAddingBoss(true)
-  }
-
   const handleToggleBoss = async (boss: Boss, killed: boolean) => {
     if (!boss.originalName || !savePath) return
 
@@ -193,20 +163,6 @@ function App() {
 
   return (
     <div className="app" style={appStyle}>
-      {isAddingBoss && (
-        <BossInfoForm
-          boss={{
-            name: '',
-            originalName: `MANUAL_${Date.now()}`,
-            category: 'Boss',
-            zone: '',
-          }}
-          onSubmit={handleSaveBossInfo}
-          onCancel={handleCancelBossInfo}
-          isEditMode={false}
-        />
-      )}
-
       <div className="title-bar">
         <span>Boss Overlay</span>
         <div className="controls">
@@ -233,7 +189,6 @@ function App() {
           currentLocation={location}
           filterMode={checklistFilterMode}
           onFilterModeChange={setChecklistFilterMode}
-          onAddBoss={handleAddBoss}
           onToggleBoss={handleToggleBoss}
           allowManualEdit={allowManualEdit}
         />

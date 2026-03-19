@@ -29,7 +29,6 @@ interface Props {
   currentLocation?: CurrentLocation | null
   filterMode: ChecklistFilterMode
   onFilterModeChange: (mode: ChecklistFilterMode) => void
-  onAddBoss?: () => void
   onToggleBoss?: (boss: Boss, killed: boolean) => void
   allowManualEdit?: boolean
 }
@@ -291,7 +290,6 @@ function BossChecklist(props: Props) {
     currentLocation,
     filterMode,
     onFilterModeChange,
-    onAddBoss,
     onToggleBoss,
     allowManualEdit = false,
   } = props
@@ -426,11 +424,6 @@ function BossChecklist(props: Props) {
                 })}
               </span>
             </div>
-            {onAddBoss && (
-              <button onClick={onAddBoss} className="add-boss-btn">
-                {t('bossList.addBossManually')}
-              </button>
-            )}
           </div>
 
           <div className="current-location-banner">

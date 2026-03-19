@@ -113,18 +113,6 @@ body {
   color: #3498db;
 }
 
-.add-boss-btn {
-  padding: 6px 12px;
-  background: #2ecc71;
-  border: none;
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
 .search-input {
   width: 100%;
   padding: 10px 12px;
