@@ -69,27 +69,50 @@ export function zoneHasVisibleContent(zone: FilteredChecklistZoneGroup): boolean
   )
 }
 
-export function buildZoneStatsParts(
+export interface ZoneRemainingSummaryPart {
+  key: ChecklistFeatureKey
+  count: number
+  label: string
+}
+
+const ZONE_SUMMARY_ICONS: Record<ChecklistFeatureKey, string> = {
+  bosses: '\u{1F3C6}',
+  pictos: '\u2728',
+  feet: '\u{1F9B6}',
+  journals: '\u{1F4D6}',
+  lostGestrals: '\u{1F476}',
+  friendlyNevrons: '\u{1F47E}',
+  weapons: '\u{1F5E1}\uFE0F',
+}
+
+export function buildZoneRemainingSummaryParts(
   zone: ChecklistZoneGroup,
   visibility: ChecklistFeatureVisibility,
-): string[] {
-  const parts: string[] = []
+): ZoneRemainingSummaryPart[] {
+  const parts: ZoneRemainingSummaryPart[] = []
 
-  if (visibility.bosses) {
-    parts.push(`B ${zone.killed}/${zone.totalBosses}`)
+  const pushPart = (key: ChecklistFeatureKey, count: number) => {
+    if (!visibility[key] || count <= 0) {
+      return
+    }
+
+    parts.push({
+      key,
+      count,
+      label: `${count}${ZONE_SUMMARY_ICONS[key]}`,
+    })
   }
-  if (visibility.pictos) {
-    parts.push(`P ${zone.foundPictos}/${zone.totalPictos}`)
-  }
-  if (visibility.feet) {
-    parts.push(`F ${zone.foundFeet}/${zone.totalFeet}`)
-  }
-  if (visibility.journals) {
-    parts.push(`J ${zone.foundJournals}/${zone.totalJournals}`)
-  }
-  if (visibility.lostGestrals) {
-    parts.push(`G ${zone.foundLostGestrals}/${zone.totalLostGestrals}`)
-  }
+
+  pushPart('bosses', zone.totalBosses - zone.killed)
+  pushPart('pictos', zone.totalPictos - zone.foundPictos)
+  pushPart('feet', zone.totalFeet - zone.foundFeet)
+  pushPart('journals', zone.totalJournals - zone.foundJournals)
+  pushPart('lostGestrals', zone.totalLostGestrals - zone.foundLostGestrals)
+  pushPart(
+    'friendlyNevrons',
+    zone.totalFriendlyNevrons - zone.peacefulFriendlyNevrons - zone.killedFriendlyNevrons,
+  )
+  pushPart('weapons', zone.totalWeapons - zone.foundWeapons)
 
   return parts
 }

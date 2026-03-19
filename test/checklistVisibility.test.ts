@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import type { FilteredChecklistZoneGroup } from '../src/components/checklistModel.ts'
 import {
   applyChecklistFeatureVisibility,
-  buildZoneStatsParts,
+  buildZoneRemainingSummaryParts,
   DEFAULT_CHECKLIST_FEATURE_VISIBILITY,
   toggleChecklistFeatureVisibility,
   zoneHasVisibleContent,
@@ -78,16 +78,29 @@ const emptyGroups = applyChecklistFeatureVisibility([sampleZone], {
 assert.equal(zoneHasVisibleContent(emptyGroups[0]), false)
 
 assert.deepEqual(
-  buildZoneStatsParts(sampleZone, {
+  buildZoneRemainingSummaryParts(sampleZone, {
+    bosses: true,
+    pictos: true,
+    feet: true,
+    journals: true,
+    lostGestrals: true,
+    friendlyNevrons: true,
+    weapons: true,
+  }).map((part) => part.label),
+  ['1\ud83c\udfc6', '2\u2728', '1\ud83e\uddb6', '3\ud83d\udcd6', '1\ud83d\udc76', '1\ud83d\udc7e', '2\ud83d\udde1\ufe0f'],
+)
+
+assert.deepEqual(
+  buildZoneRemainingSummaryParts(sampleZone, {
     bosses: false,
     pictos: true,
     feet: false,
-    journals: true,
+    journals: false,
     lostGestrals: false,
-    friendlyNevrons: true,
-    weapons: true,
-  }),
-  ['P 3/5', 'J 1/4'],
+    friendlyNevrons: false,
+    weapons: false,
+  }).map((part) => part.label),
+  ['2\u2728'],
 )
 
 console.log('checklistVisibility tests passed')

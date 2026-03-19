@@ -19,7 +19,7 @@ import {
 } from './checklistModel'
 import {
   applyChecklistFeatureVisibility,
-  buildZoneStatsParts,
+  buildZoneRemainingSummaryParts,
   type ChecklistFeatureKey,
   type ChecklistFeatureVisibility,
   zoneHasVisibleContent,
@@ -531,6 +531,10 @@ function BossChecklist(props: Props) {
                 const unmatchedNames = [
                   ...new Set(zone.unmatchedEntries.map((entry) => entry.rawName)),
                 ]
+                const remainingSummaryParts = buildZoneRemainingSummaryParts(
+                  zone,
+                  featureVisibility,
+                )
                 return (
                   <div key={zone.zoneName} className="zone-group">
                     <div
@@ -550,9 +554,13 @@ function BossChecklist(props: Props) {
                       {unmatchedNames.length > 0 && (
                         <span className="zone-badge">{t('bossList.unmappedLocationBadge')}</span>
                       )}
-                      {buildZoneStatsParts(zone, featureVisibility).length > 0 && (
+                      {remainingSummaryParts.length > 0 && (
                         <span className="zone-stats">
-                          {buildZoneStatsParts(zone, featureVisibility).join(' | ')}
+                          {remainingSummaryParts.map((part) => (
+                            <span key={`${zone.zoneName}-${part.key}`} className="zone-summary-chip">
+                              {part.label}
+                            </span>
+                          ))}
                         </span>
                       )}
                     </div>
