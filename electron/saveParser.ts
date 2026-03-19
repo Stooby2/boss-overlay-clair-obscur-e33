@@ -43,6 +43,11 @@ import {
   type PictoSaveData,
   validatePictoAcquireData,
 } from './pictos.js'
+import {
+  extractWeapons,
+  type WeaponCatalogFile,
+  type WeaponSaveData,
+} from './weapons.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -67,6 +72,7 @@ let friendlyNevronCatalog: FriendlyNevronCatalogFile['FriendlyNevrons'] | null =
 let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
   null
 let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
+let weaponCatalog: WeaponCatalogFile['Weapons'] | null = null
 
 type BossDatabaseByZone = Record<
   string,
@@ -84,7 +90,7 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData, FriendlyNevronSaveData {
+interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData, FriendlyNevronSaveData, WeaponSaveData {
   root: {
     properties: PictoSaveProperties & {
       MapToLoad_0?: {
@@ -350,6 +356,26 @@ async function loadMonocoFeetData() {
   }
 }
 
+async function loadWeaponData() {
+  if (weaponCatalog) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('weapons.json')
+    console.log('Loading weapon catalog from:', catalogPath)
+
+    const catalogContent = await readFile(catalogPath, 'utf-8')
+    const parsedCatalog = JSON.parse(catalogContent) as WeaponCatalogFile
+    weaponCatalog = parsedCatalog.Weapons
+
+    console.log(`Loaded ${Object.keys(weaponCatalog).length} weapons`)
+  } catch (error) {
+    console.error('Failed to load weapon data:', error)
+    weaponCatalog = {}
+  }
+}
+
 export async function saveBossDatabase(newBoss: {
   originalName: string
   id: string
@@ -415,6 +441,7 @@ function createFallbackSnapshot(): SaveSnapshot {
       lostGestralCatalog ? extractLostGestrals({}, lostGestralCatalog) : [],
     friendlyNevrons:
       friendlyNevronCatalog ? extractFriendlyNevrons({}, friendlyNevronCatalog) : [],
+    weapons: weaponCatalog ? extractWeapons({}, weaponCatalog) : [],
     location: null,
   }
 }
@@ -440,6 +467,7 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
       friendlyNevronCatalog
         ? extractFriendlyNevrons(saveData, friendlyNevronCatalog)
         : [],
+    weapons: weaponCatalog ? extractWeapons(saveData, weaponCatalog) : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -452,6 +480,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadLostGestralData()
   await loadFriendlyNevronData()
   await loadMonocoFeetData()
+  await loadWeaponData()
 
   try {
     const stats = await stat(savePath)
@@ -658,5 +687,3 @@ function getMockBosses(): Boss[] {
     },
   ]
 }
-
-

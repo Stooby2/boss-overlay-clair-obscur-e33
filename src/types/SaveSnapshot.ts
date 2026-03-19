@@ -5,6 +5,7 @@ import type { JournalEntry } from './JournalEntry'
 import type { LostGestralEntry } from './LostGestralEntry'
 import type { MonocoFoot } from './MonocoFoot'
 import type { Picto } from './Picto'
+import type { WeaponEntry } from './WeaponEntry'
 
 export interface SaveSnapshot {
   bosses: Boss[]
@@ -13,6 +14,6 @@ export interface SaveSnapshot {
   journals: JournalEntry[]
   lostGestrals: LostGestralEntry[]
   friendlyNevrons: FriendlyNevronEntry[]
+  weapons: WeaponEntry[]
   location: CurrentLocation | null
 }
-
