@@ -39,7 +39,9 @@
     "test:weapon-catalog": "node --experimental-strip-types test/weaponCatalog.test.ts",
     "test:weapon-parser": "node --experimental-strip-types test/weaponParser.test.ts",
     "test:checklist-visibility": "node --experimental-strip-types test/checklistVisibility.test.ts",
-    "test:music-locations": "node --experimental-strip-types test/musicLocations.test.ts"
+    "test:music-locations": "node --experimental-strip-types test/musicLocations.test.ts",
+    "test:music-catalog": "node --experimental-strip-types test/musicCatalog.test.ts",
+    "test:music-parser": "node --experimental-strip-types test/musicParser.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {

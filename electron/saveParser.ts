@@ -36,6 +36,11 @@ import {
   parseMonocoFeetMetadata,
 } from './monocoFeet.js'
 import {
+  extractMusicRecords,
+  type MusicRecordCatalogFile,
+  type MusicRecordSaveData,
+} from './musicRecords.js'
+import {
   extractPictos,
   parsePictoAcquireTsv,
   type PictoAcquireInfo,
@@ -69,6 +74,7 @@ let journalCatalog: JournalCatalogFile['Journals'] | null = null
 let journalLocations: JournalLocationFile['Journals'] | null = null
 let lostGestralCatalog: LostGestralCatalogFile['LostGestrals'] | null = null
 let friendlyNevronCatalog: FriendlyNevronCatalogFile['FriendlyNevrons'] | null = null
+let musicRecordCatalog: MusicRecordCatalogFile['MusicRecords'] | null = null
 let monocoFeetCatalog: Record<string, MonocoFeetCatalogFile['MonocoFeet'][string]> | null =
   null
 let monocoFeetMetadata: Map<string, MonocoFeetMetadataEntry> | null = null
@@ -90,7 +96,7 @@ type PictoSaveProperties = NonNullable<
   NonNullable<PictoSaveData['root']>['properties']
 >
 
-interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData, FriendlyNevronSaveData, WeaponSaveData {
+interface SaveData extends JournalSaveData, LocationSaveData, MonocoFeetSaveData, FriendlyNevronSaveData, WeaponSaveData, MusicRecordSaveData {
   root: {
     properties: PictoSaveProperties & {
       MapToLoad_0?: {
@@ -324,6 +330,26 @@ async function loadFriendlyNevronData() {
   }
 }
 
+async function loadMusicRecordData() {
+  if (musicRecordCatalog) {
+    return
+  }
+
+  try {
+    const catalogPath = getDataPath('music_records.json')
+    console.log('Loading music record catalog from:', catalogPath)
+
+    const catalogContent = await readFile(catalogPath, 'utf-8')
+    const parsedCatalog = JSON.parse(catalogContent) as MusicRecordCatalogFile
+    musicRecordCatalog = parsedCatalog.MusicRecords
+
+    console.log(`Loaded ${Object.keys(musicRecordCatalog).length} music records`)
+  } catch (error) {
+    console.error('Failed to load music record data:', error)
+    musicRecordCatalog = {}
+  }
+}
+
 async function loadMonocoFeetData() {
   if (monocoFeetCatalog && monocoFeetMetadata) {
     return
@@ -442,6 +468,7 @@ function createFallbackSnapshot(): SaveSnapshot {
     friendlyNevrons:
       friendlyNevronCatalog ? extractFriendlyNevrons({}, friendlyNevronCatalog) : [],
     weapons: weaponCatalog ? extractWeapons({}, weaponCatalog) : [],
+    musicRecords: musicRecordCatalog ? extractMusicRecords({}, musicRecordCatalog) : [],
     location: null,
   }
 }
@@ -468,6 +495,9 @@ function buildSaveSnapshot(saveData: SaveData): SaveSnapshot {
         ? extractFriendlyNevrons(saveData, friendlyNevronCatalog)
         : [],
     weapons: weaponCatalog ? extractWeapons(saveData, weaponCatalog) : [],
+    musicRecords: musicRecordCatalog
+      ? extractMusicRecords(saveData, musicRecordCatalog)
+      : [],
     location: locationCatalog ? extractCurrentLocation(saveData, locationCatalog) : null,
   }
 }
@@ -479,6 +509,7 @@ export async function parseSaveFile(savePath: string): Promise<SaveSnapshot> {
   await loadJournalData()
   await loadLostGestralData()
   await loadFriendlyNevronData()
+  await loadMusicRecordData()
   await loadMonocoFeetData()
   await loadWeaponData()
 
