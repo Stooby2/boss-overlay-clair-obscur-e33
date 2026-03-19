@@ -9,8 +9,8 @@ Every code change should be handled as a PR-sized changeset:
 1. Understand the request and identify the smallest safe deliverable.
 2. Make the edits for that deliverable only.
 3. Review the resulting diff before declaring the work done.
-4. Run the build.
-5. Run all relevant tests.
+4. Run all relevant tests, plus type check and lint.
+5. Run the build last.
 6. When verification passes, leave the work as a single cohesive changeset for that PR.
 
 Do not mix unrelated fixes into the same changeset.
@@ -57,9 +57,19 @@ The change is not done until this review has happened.
 
 Run these repository checks after code changes when relevant:
 
-- `npm run build`
-- `npm run lint`
+- Relevant focused tests
 - `npm run ts:check`
+- `npm run lint`
+- `npm run build`
+
+Preferred order:
+
+1. Relevant focused tests
+2. `npm run ts:check`
+3. `npm run lint`
+4. `npm run build`
+
+Run `npm run build` after the other relevant verification passes, and only finalize the PR-sized slice after the build succeeds.
 
 Also run:
 

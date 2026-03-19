@@ -9,7 +9,7 @@ Read and follow the detailed workflow in [`.github/CODEX_WORKFLOW.md`](./.github
 1. Treat every code change as a PR-sized unit of work.
 2. Start new functionality by writing or updating tests first whenever practical.
 3. For large changes, first write a detailed PR breakdown plan, then implement one PR-sized slice at a time.
-4. Before considering work complete, review your own diff, run the build, and run all relevant tests.
+4. Before considering work complete, review your own diff, run all relevant tests plus lint and type check first, then run the build last, and only finalize after the build passes.
 5. Keep the result as a single coherent changeset for that PR-sized slice.
 
 ## Repository Verification Commands
@@ -18,6 +18,15 @@ Read and follow the detailed workflow in [`.github/CODEX_WORKFLOW.md`](./.github
 - Lint: `npm run lint`
 - Type check: `npm run ts:check`
 - Tests: no test script is currently defined in `package.json`; add and run focused tests when introducing new behavior
+
+Preferred verification order for PR-sized slices:
+
+1. Relevant focused tests
+2. `npm run ts:check`
+3. `npm run lint`
+4. `npm run build`
+
+Treat `npm run build` as the final verification step before finalizing the PR-sized slice.
 
 ## Test Fixtures
 
