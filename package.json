@@ -32,7 +32,8 @@
     "test:journal-locations": "node --experimental-strip-types test/journalLocations.test.ts",
     "test:journal-parser": "node --experimental-strip-types test/journalParser.test.ts",
     "test:lost-gestrals-catalog": "node --experimental-strip-types test/lostGestralsCatalog.test.ts",
-    "test:lost-gestrals-parser": "node --experimental-strip-types test/lostGestralsParser.test.ts"
+    "test:lost-gestrals-parser": "node --experimental-strip-types test/lostGestralsParser.test.ts",
+    "test:friendly-nevrons-catalog": "node --experimental-strip-types test/friendlyNevronsCatalog.test.ts"
   },
   "license": "CC-BY-NC-SA-4.0",
   "dependencies": {
@@ -64,3 +65,4 @@
     "vite-plugin-electron-renderer": "0.14.6"
   }
 }
+

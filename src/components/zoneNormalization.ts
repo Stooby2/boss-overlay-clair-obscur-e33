@@ -18,6 +18,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
   endless_tower: ['endless_tower', 'Endless Tower'],
   esoteric_ruins_continent: [
     'esoteric_ruins_continent',
+    'Esoteric Ruins',
     'Esoteric Ruins/Continent',
   ],
   esquie_nest: ['esquie_nest', "Esquie's Nest"],
@@ -85,7 +86,7 @@ export const ZONE_ALIASES: Record<string, string[]> = {
     'Monolith Peak',
   ],
   the_reacher: ['the_reacher', 'The Reacher'],
-  the_small_bourgeon: ['the_small_bourgeon', 'The Small Bourgeon'],
+  the_small_bourgeon: ['the_small_bourgeon', 'The Small Bourgeon', 'Small Bourgeon'],
   verso_drafts: ['verso_drafts', "Verso's Draft", "Verso's Drafts"],
   visages: ['visages', 'Visages'],
   white_tree: ['white_tree', 'White Tree'],
@@ -107,3 +108,4 @@ export function toZoneLookupKey(value: string): string {
     .replace(/\s+/g, ' ')
     .toLowerCase()
 }
+
